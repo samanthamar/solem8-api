@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require('express'); 
 const rp = require('request-promise');
 const $ = require('cheerio');
 const app = express();
@@ -7,6 +7,7 @@ const craigslistParse = require('./craigslistParse');
 // OMG THIS ONE IS WORKING
 app.get('/craigslist', function(req, res) {
   // Define url
+  // TODO: what if the model contains more than one string? 
   let model = req.query.model.toLowerCase();
   let size = req.query.size.toLowerCase();
   craigslistUrl = 'https://toronto.craigslist.org/search/sss?query='+model+'+'+size+'&sort=rel'
@@ -27,14 +28,14 @@ app.get('/craigslist', function(req, res) {
       var firstPageResults = parseInt($('.rangeTo', html).first().text());
       console.log(firstPageResults)
       // Store links to each post here
-      const listings =[]; 
+      let listings =[]; 
       // Get list of urls of postings from the first page only
       // TODO: extend to all pages
       for (let i =0; i < firstPageResults; i++) {
           // get the link and store each in list
           listings.push($('p > a', html)[i].attribs.href); 
       }
-      // Retrieve all shoe info from each listing 
+      // Retrieve all shoe info promises from each listing 
       return Promise.all(
           listings.map(function(url){
               return craigslistParse(url)
@@ -46,9 +47,10 @@ app.get('/craigslist', function(req, res) {
   .then(function(results) {
       var json = {
         status: 'OK', 
-        results: results 
+        shoes: results 
       }
-      res.send(json)
+      console.log(JSON.stringify(json, null, "2")); 
+      res.send(json);
   });
 });
 
