@@ -4,10 +4,11 @@ const $ = require('cheerio');
 const craigslistParse = function(url) {
     return rp(url)
         .then(function(html) {
-            // Parse class name
+            // TODO: store photos, what if there is multiple photos
             return {
                 title: $('span[id="titletextonly"]', html).text(),
                 price: $('.price', html).text(),
+                desc: $('#postingbody', html).text(),
                 url: url 
             };
         })
@@ -16,5 +17,5 @@ const craigslistParse = function(url) {
             console.log(err);
         });
 };
-
+// Export so other files can use this function
 module.exports = craigslistParse;
