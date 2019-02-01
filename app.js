@@ -36,9 +36,10 @@ app.get('/craigslist', function(req, res) {
           // get the link and store each in list
           listings.push($('p > a', html)[i].attribs.href); 
       }
-      // Retrieve all shoe info promises from each listing 
+      // Retrieve all shoe info promises from each listing
+      // Promise.all takes an array of promises 
       return Promise.all(
-          listings.map(function(url){
+          listings.map((url) => {
               return craigslistParse(url)
           })
       );
