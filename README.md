@@ -6,7 +6,9 @@ In solem8-api: npm i -s express request-promise cheerio
 
 **API Endpoint:** localhost:5000/craigslist/
 
-**Usage:** `?model=<model>&size=<size>`\
+**Usage:** 
+node app.js
+`?model=<model>&size=<size>`\
 
 ---
 
