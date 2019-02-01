@@ -2,13 +2,16 @@
 A RESTful API that scrapes the Craigslist to get search results and info.
 ---
 **INSTALLATION**
-In solem8-api: npm i -s express request-promise cheerio
+`npm i -s express request request-promise cheerio`
 
-**API Endpoint:** localhost:5000/craigslist/
+Start local server:
+`node app.js`
+
+**API Endpoint:** 
+`localhost:5000/craigslist/`
 
 **Usage:** 
-node app.js
-`?model=<model>&size=<size>`\
+`?model=<model>&size=<size>`
 
 ---
 
