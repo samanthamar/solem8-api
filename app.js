@@ -3,15 +3,15 @@ const rp = require('request-promise');
 const $ = require('cheerio');
 const app = express();
 const craigslistParse = require('./craigslistParse');
-let count = 0;
 
 app.get('/craigslist', function(req, res) {
   let model = req.query.model.toLowerCase();
   let size = req.query.size.toLowerCase();
-  let searchParams = model+"+"+"size"+"+"+size // ie.Yeezy+desert+size+9
   // TODO: 
   // Define location somewhere
-  craigslistUrl = 'https://toronto.craigslist.org/search/sss?query='+searchParams+'&sort=rel'
+  // let location = req.query.location.toLowerCase(); 
+  let searchParams = model+"+"+"size"+"+"+size // ie.Yeezy+desert+size+9
+  craigslistUrl = 'https://toronto.craigslist.org/search/sss?query='+searchParams+'&sort=rel'+'&searchNearby=1'
   // request promise
   rp(craigslistUrl)
     // gets the html
@@ -26,10 +26,11 @@ app.get('/craigslist', function(req, res) {
   }) 
   .then((urls) => {
       // From each result page, get the urls to each post
+      let promiseCount = 0; 
       return Promise.all(
         urls.map((url) => {
-          count++;
-          console.log("-----------------------------------Promise.all count: " + count);
+          promiseCount++;
+          console.log("-----------------------------------Promise.all count: " + promiseCount);
           console.log(url)
           return craigslistParse(url)
         })
@@ -55,15 +56,15 @@ const urls = (numOfResults, searchParams) => {
   let pageUrls = []; 
   // Craigslist lists a max of 120 posts/page
   if (numOfResults < 120){
-    pageUrls.push(baseUrl+searchParams+'&sort=rel')
+    pageUrls.push(baseUrl+searchParams+'&sort=rel'+'&searchNearby=1')
   } else {
     let numPagesToCrawl = Math.floor(numOfResults/120);
     console.log("Pages to crawl: " + numPagesToCrawl)
     for (let i=0; i<=numPagesToCrawl; i++){
       if (i==0) {
-        pageUrls.push(baseUrl+searchParams+'&sort=rel')
+        pageUrls.push(baseUrl+searchParams+'&sort=rel'+'&searchNearby=1')
       } else if (i==1){
-        pageUrls.push(baseUrl+searchParams+'&s='+(i*120).toString()+'&sort=rel')
+        pageUrls.push(baseUrl+searchParams+'&s='+(i*120).toString()+'&sort=rel'+'&searchNearby=1')
       }
     }
 
