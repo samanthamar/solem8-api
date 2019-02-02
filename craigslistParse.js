@@ -1,3 +1,4 @@
+// Deprecated: moved to Craigslist.js class
 const rp = require('request-promise');
 const $ = require('cheerio');
 
