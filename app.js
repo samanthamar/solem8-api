@@ -5,7 +5,7 @@ const app = express();
 // const craigslistParse = require('./craigslistParse');
 const Craigslist = require('./Craigslist.js');
 const cl = new Craigslist(); 
-
+// The endpoints go here
 app.get('/craigslist', function(req, res) {
   let model = req.query.model.toLowerCase();
   let size = req.query.size.toLowerCase();

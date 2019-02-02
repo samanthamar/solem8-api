@@ -50,6 +50,7 @@ class Craigslist {
                     // console.log($('span.result-meta', html)[i].children[0].next.children[0].parent)
     
                     // Only add shoe if price data is available
+                    // This was a pain in the ass to figure out
                     if (resultMetaFirstClass=='result-price') {
                         let url = $('a.result-title.hdrlnk', html)[i].attribs.href;
                         let title = $('a.result-title.hdrlnk', html)[i].children[0].data;
