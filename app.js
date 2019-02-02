@@ -3,7 +3,7 @@ const rp = require('request-promise');
 const $ = require('cheerio');
 const app = express();
 const craigslistParse = require('./craigslistParse');
-const getHtml = require('./getHtml'); 
+let count = 0;
 
 app.get('/craigslist', function(req, res) {
   let model = req.query.model.toLowerCase();
@@ -16,49 +16,60 @@ app.get('/craigslist', function(req, res) {
   rp(craigslistUrl)
     // gets the html
     .then((html) => {
-      // TODO: use this to extend to multiple pages
-      // Get total num of result on first page 
-      let numFirstPageResults = parseInt($('.rangeTo', html).first().text());
       // Get total num of results
       let numTotalResults = parseInt($('.totalcount', html).first().text());
-      // Get total num of pages to crawl
-      let numPagesToCrawl = 0
-      if (numTotalResults > 120) {
-        // Craigslist displays 120 ads/page
-        numPagesToCrawl = Math.floor(numTotalResults/120)
-      }
-      console.log(numFirstPageResults)
-      // Store links to each post here
-      let listings =[]; 
-      // Get list of urls of postings from the first page only
-      // TODO: extend to all pages
-      for (let i =0; i < numFirstPageResults; i++) {
-          // get the link and store each in list
-          listings.push($('p > a', html)[i].attribs.href); 
-      }
-      // Retrieve all shoe info promises from each listing
-      // Promise.all takes an array of promises 
+      // Debugging
+      console.log("Num of results:" + numTotalResults)
+      // Get list of all urls to visit
+      let resultsUrls = urls(numTotalResults, searchParams); 
+      return resultsUrls; 
+  }) 
+  .then((urls) => {
+      // From each result page, get the urls to each post
       return Promise.all(
-          listings.map((url) => {
-              return craigslistParse(url)
-          })
-      );
+        urls.map((url) => {
+          count++;
+          console.log("-----------------------------------Promise.all count: " + count);
+          console.log(url)
+          return craigslistParse(url)
+        })
+      )
   })
-  // when the promise is returned, return a json of results 
-  // with shoe info
   .then((results) => {
       var json = {
         status: 'OK', 
-        shoes: results 
+        shoeUrls: results 
       }
-      console.log(JSON.stringify(json, null, "2")); 
       res.send(json);
+      console.log('success')
   })
   .catch((error) => {
     // handle this error
     console.log(error)
   })
 });
+
+const urls = (numOfResults, searchParams) => {
+  // Limited to Toronto
+  let baseUrl = 'https://toronto.craigslist.org/search/sss?query='
+  let pageUrls = []; 
+  // Craigslist lists a max of 120 posts/page
+  if (numOfResults < 120){
+    pageUrls.push(baseUrl+searchParams+'&sort=rel')
+  } else {
+    let numPagesToCrawl = Math.floor(numOfResults/120);
+    console.log("Pages to crawl: " + numPagesToCrawl)
+    for (let i=0; i<=numPagesToCrawl; i++){
+      if (i==0) {
+        pageUrls.push(baseUrl+searchParams+'&sort=rel')
+      } else if (i==1){
+        pageUrls.push(baseUrl+searchParams+'&s='+(i*120).toString()+'&sort=rel')
+      }
+    }
+
+  }
+  return pageUrls;
+}
 
 const searchParams = (searchTerms) => {
   let searchParam = ""
