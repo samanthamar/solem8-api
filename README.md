@@ -1,4 +1,4 @@
-# SoleM8 Test API
+# SoleM8 API
 A RESTful API that scrapes Craigslist to get search results and info.
 ---
 **INSTALLATION**
