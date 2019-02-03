@@ -4,9 +4,11 @@ const $ = require('cheerio');
 const db = require('./../db');
 const Craigslist = require('./../crawlers/Craigslist');
 
+// THIS FILE CONTAINS ALL THE ENDPOINT LOGIC 
+
 // Test route
 router.get('/', (req, res) => {
-  res.status(200).json({ message: 'Connected!' });
+  res.status(200).json({ message: 'Your backend is working!' });
 });
 
 // Scrape Craigslist 
@@ -71,14 +73,39 @@ router.get('/craigslist', (req, res) => {
           status: 200, 
           shoeUrls: results
         }
+        // Insert into DB
         cl.insert(db, results)
+        // Output JSON reponse 
         res.send(json);
-        console.log('success')
+        console.log('Successfully scraped')
     })
     .catch((error) => {
       // handle this error
       console.log(error)
     })
   });
+
+router.get('/getCrawlData', (req, res) => {
+    // Currently, all records are returned from the crawlData table. 
+    // Need to add filtering! 
+    // TODO: figure out which params to request to query DB
+    // let id = parseInt(req.query.id.toLowerCase()); 
+    // let source = req.query.source.toLowerCase(); 
+    // let size = req.query.size.toLowerCase(); 
+    // let model = req.query.size.toLowerCase(); 
+    let query = "select * from crawlData"; 
+    db.query(query, (err, result) => {
+        // Need to handle errors properly
+        if (err) throw err;
+        // console.log(result);
+        console.log("Records successfully retreived")
+        let json = {
+            status: 200, 
+            records: result
+        }
+        // Output JSON reponse 
+        res.send(json)
+    });
+}); 
 
 module.exports = router;

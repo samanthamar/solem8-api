@@ -5,6 +5,7 @@ const router = require('./routes/routes');
 // List routes here
 app.use('/', router);
 app.use('/craigslist', router); 
+app.use('/getCrawlData', router); 
 
 // Define what port to listen on
 app.listen(3000, () => {

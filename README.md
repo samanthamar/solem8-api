@@ -15,7 +15,7 @@ Execute the following to create the appropriate local DB and table:
 
 `create database solem8;`
 
-`create table crawlData (id int NOT NULL AUTO_INCREMENT, url varchar(100), title varchar(100), price float, PRIMARY KEY(id));`
+`create table crawlData (id int NOT NULL AUTO_INCREMENT, url varchar(100), source varchar(50), title varchar(100), price float, PRIMARY KEY(id));`
 
 **Usage:** 
 `?model=<model>&size=<size>`

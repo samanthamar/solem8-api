@@ -73,14 +73,15 @@ class Craigslist extends BaseCrawler {
 
     insert(connection, data) {
         let insertQueries = [];
-        let baseQuery = "INSERT INTO crawlData (url, title, price) VALUES (";
+        let baseQuery = "INSERT INTO crawlData (url, source, title, price) VALUES (";
         data.forEach((pageResults) => {
             pageResults.forEach((shoe) => {
                 // TODO: what if the title has a " ' " in it? 
                 let url = "'" + shoe.url + "'";
                 let title = "'" + shoe.title + "'"; 
                 let price = parseFloat(shoe.price.replace(/[$,]+/g,""))
-                let q = baseQuery + url + " ," + title + " ," + price + ")"
+                let q = baseQuery + url + " ,'craigslist', " + title + " ," + price + ")"
+                console.log(q)
                 insertQueries.push(q)
             })
         })
