@@ -1,34 +1,14 @@
 const rp = require('request-promise');
 const $ = require('cheerio');
-// This class contains all functions used by the Craigslist scraper
-class Craigslist {
+const BaseCrawler = require('./BaseCrawler.js');
+class Craigslist extends BaseCrawler {
 
-    // Helper functions 
-    urls (numOfResults, searchParams) {
-        // Limited to Toronto
-        let baseUrl = 'https://toronto.craigslist.org/search/sss?query='
-        let pageUrls = []; 
-        // Craigslist lists a max of 120 posts/page
-        if (numOfResults < 120){
-            pageUrls.push(baseUrl+searchParams+'&sort=rel'+'&searchNearby=1')
-        } else {
-            let numPagesToCrawl = Math.floor(numOfResults/120);
-            console.log("Pages to crawl: " + numPagesToCrawl)
-            for (let i=0; i<=numPagesToCrawl; i++){
-            if (i==0) {
-                pageUrls.push(baseUrl+searchParams+'&sort=rel'+'&searchNearby=1')
-            } else if (i==1){
-                pageUrls.push(baseUrl+searchParams+'&s='+(i*120).toString()+'&sort=rel'+'&searchNearby=1')
-            }
-            }
-        
-        }
-        return pageUrls;
+    constructor(url) {
+        super(url); 
     }
 
-    // From the results page, parse post info
-    craigslistParse (url) {
-        return rp(url)
+    crawl() {
+        return rp(this.url)
             .then((html) => {
                 // (rangeFrom - rangeTo)
                 let rangeFrom = parseInt($('.rangeFrom',html).first().text()); 
@@ -75,18 +55,42 @@ class Craigslist {
                             price: price,
                             // photo: photo 
                         }
-    
+
                         shoes.push(shoeInfo)
                     }
        
                 }
+
                 return shoes;
+
             })
             .catch((err) => {
                 // handle error
                 console.log(err);
             });
     };
+
+    insert(connection, data) {
+        let insertQueries = [];
+        let baseQuery = "INSERT INTO crawlData (url, title, price) VALUES (";
+        data.forEach((pageResults) => {
+            pageResults.forEach((shoe) => {
+                let url = "'" + shoe.url + "'"; 
+                let title = "'" + shoe.title + "'"; 
+                let price = parseFloat(shoe.price.replace(/[$,]+/g,""))
+                let q = baseQuery + url + " ," + title + " ," + price + ")"
+                insertQueries.push(q)
+            })
+        })
+        // Insert into table
+        insertQueries.forEach((query) => {
+            connection.query(query, (err, result) => {
+                // Need to handle errors properly
+                if (err) throw err;
+                console.log("1 record inserted");
+            });
+        })
+    }
 }
 
 module.exports = Craigslist;

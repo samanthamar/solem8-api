@@ -2,14 +2,22 @@ const express = require('express');
 const rp = require('request-promise');
 const $ = require('cheerio');
 const app = express();
+const mysql = require('mysql');
 // const craigslistParse = require('./craigslistParse');
 const Craigslist = require('./Craigslist.js');
-const cl = new Craigslist(); 
+
+// DB Stuff Should NOT be defined here 
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'solem8'
+});
+
 // The endpoints go here
 app.get('/craigslist', (req, res) => {
   let model = req.query.model.toLowerCase();
   let size = req.query.size.toLowerCase();
-
   // TODO: 
   // Define location somewhere
   // let location = req.query.location.toLowerCase(); 
@@ -23,8 +31,30 @@ app.get('/craigslist', (req, res) => {
       let numTotalResults = parseInt($('.totalcount', html).first().text());
       // Debugging
       console.log("Num of results:" + numTotalResults)
+
+      // Put me somewhere else
+      const urls =  (numOfResults, searchParams) => {
+        // Limited to Toronto
+        let baseUrl = 'https://toronto.craigslist.org/search/sss?query='
+        let pageUrls = []; 
+        // Craigslist lists a max of 120 posts/page
+        if (numOfResults < 120){
+            pageUrls.push(baseUrl+searchParams+'&sort=rel'+'&searchNearby=1')
+        } else {
+            let numPagesToCrawl = Math.floor(numOfResults/120);
+            console.log("Pages to crawl: " + numPagesToCrawl)
+            for (let i=0; i<=numPagesToCrawl; i++){
+            if (i==0) {
+                pageUrls.push(baseUrl+searchParams+'&sort=rel'+'&searchNearby=1')
+            } else if (i==1){
+                pageUrls.push(baseUrl+searchParams+'&s='+(i*120).toString()+'&sort=rel'+'&searchNearby=1')
+            }
+          }
+        }
+        return pageUrls;
+      }
       // Get list of all urls to visit
-      let resultsUrls = cl.urls(numTotalResults, searchParams)
+      let resultsUrls = urls(numTotalResults, searchParams)
       return resultsUrls; 
   }) 
   .then((urls) => {
@@ -32,18 +62,28 @@ app.get('/craigslist', (req, res) => {
       let promiseCount = 0; 
       return Promise.all(
         urls.map((url) => {
+          let cl = new Craigslist(url); 
           promiseCount++;
           console.log("-----------------------------------Promise.all count: " + promiseCount);
           console.log(url)
-          return cl.craigslistParse(url)
+          return cl.crawl()
         })
       )
   })
   .then((results) => {
+      let cl = new Craigslist();
+      // DB stuff should not go here
+      connection.connect((err) => {
+        if (err) {
+          return console.error('error: ' + err.message);
+        }
+        console.log('Connected to the MySQL server.');
+      });
       var json = {
         status: 'OK', 
-        shoeUrls: results 
+        shoeUrls: results
       }
+      cl.insert(connection, results)
       res.send(json);
       console.log('success')
   })
