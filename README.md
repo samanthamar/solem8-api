@@ -8,7 +8,7 @@ Start local server:
 `node app.js`
 
 **API Endpoints:** 
-`localhost:5000/craigslist/`
+`localhost:3000/craigslist/`
 
 **LocalDB:**
 Execute the following to create the appropriate local DB and table:
