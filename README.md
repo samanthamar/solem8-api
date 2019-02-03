@@ -10,10 +10,11 @@ Start local server:
 **API Endpoints:** 
 `localhost:5000/craigslist/`
 
-**LocalDB**
+**LocalDB:**
 You will need to create mySql database `solem8` and create a table `crawlData` 
 
 `create database solem8;`
+
 `create table crawlData (id int NOT NULL AUTO_INCREMENT, url varchar(100), title varchar(100), price float, PRIMARY KEY(id));`
 
 **Usage:** 

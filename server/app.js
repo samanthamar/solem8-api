@@ -2,8 +2,8 @@ const express = require('express');
 const rp = require('request-promise');
 const $ = require('cheerio');
 const app = express();
-const db = require('./db');
-const Craigslist = require('./Craigslist.js');
+const db = require('./../db');
+const Craigslist = require('./../crawlers/Craigslist');
 
 // The endpoints go here
 app.get('/craigslist', (req, res) => {
