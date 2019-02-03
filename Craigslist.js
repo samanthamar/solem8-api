@@ -1,6 +1,7 @@
 const rp = require('request-promise');
 const $ = require('cheerio');
 const BaseCrawler = require('./BaseCrawler.js');
+
 class Craigslist extends BaseCrawler {
 
     constructor(url) {

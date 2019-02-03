@@ -2,17 +2,8 @@ const express = require('express');
 const rp = require('request-promise');
 const $ = require('cheerio');
 const app = express();
-const mysql = require('mysql');
-// const craigslistParse = require('./craigslistParse');
+const db = require('./db');
 const Craigslist = require('./Craigslist.js');
-
-// DB Stuff Should NOT be defined here 
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'solem8'
-});
 
 // The endpoints go here
 app.get('/craigslist', (req, res) => {
@@ -72,18 +63,11 @@ app.get('/craigslist', (req, res) => {
   })
   .then((results) => {
       let cl = new Craigslist();
-      // DB stuff should not go here
-      connection.connect((err) => {
-        if (err) {
-          return console.error('error: ' + err.message);
-        }
-        console.log('Connected to the MySQL server.');
-      });
       var json = {
         status: 'OK', 
         shoeUrls: results
       }
-      cl.insert(connection, results)
+      cl.insert(db, results)
       res.send(json);
       console.log('success')
   })
