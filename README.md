@@ -9,6 +9,7 @@ Start local server:
 
 **API Endpoints:** 
 `localhost:3000/craigslist/`
+`localhost:3000/getCrawlData/`
 
 **LocalDB:**
 Execute the following to create the appropriate local DB and table:
@@ -18,7 +19,7 @@ Execute the following to create the appropriate local DB and table:
 `create table crawlData (id int NOT NULL AUTO_INCREMENT, url varchar(100), source varchar(50), title varchar(100), price float, PRIMARY KEY(id));`
 
 **Usage:** 
-`?model=<model>&size=<size>`
+/craigslist: `?model=<model>&size=<size>`
 
 ---
 
