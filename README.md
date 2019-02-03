@@ -11,7 +11,7 @@ Start local server:
 `localhost:5000/craigslist/`
 
 **LocalDB:**
-You will need to create mySql database `solem8` and create a table `crawlData` 
+Execute the following to create the appropriate local DB and table:
 
 `create database solem8;`
 
