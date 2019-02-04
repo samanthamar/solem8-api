@@ -1,6 +1,7 @@
 const rp = require('request-promise');
 const $ = require('cheerio');
-const BaseCrawler = require('./BaseCrawler.js');
+const BaseCrawler = require('./BaseCrawler');
+const Shoe = require('./../models/Shoe');
 
 class Craigslist extends BaseCrawler {
 
@@ -8,9 +9,10 @@ class Craigslist extends BaseCrawler {
         super(url); 
     }
 
-    crawl() {
+    crawl(baseShoe) {
         return rp(this.url)
             .then((html) => {
+                console.log(baseShoe)
                 // (rangeFrom - rangeTo)
                 let rangeFrom = parseInt($('.rangeFrom',html).first().text()); 
                 let rangeTo = parseInt($('.rangeTo',html).first().text()); 
@@ -49,18 +51,16 @@ class Craigslist extends BaseCrawler {
                             // TODO: FIGURE OUT HOW TO GET PHOTO SRC
                             // It's nested weird
                         }
-    
-                        let shoeInfo = {
-                            url: url, 
-                            title: title, 
-                            price: price,
-                            // photo: photo 
-                        }
-
-                        shoes.push(shoeInfo)
+                        console.log("-----------pushing shoes into list")
+                        shoes.push(new Shoe(baseShoe.model, baseShoe.size, url, 'craigslist', title, price));
                     }
        
                 }
+
+                // insert each shoe into DB
+                shoes.forEach((shoe) => {
+                    shoe.insert();
+                });
 
                 return shoes;
 
@@ -70,30 +70,6 @@ class Craigslist extends BaseCrawler {
                 console.log(err);
             });
     };
-
-    insert(connection, data) {
-        let insertQueries = [];
-        let baseQuery = "INSERT INTO crawlData (url, source, title, price) VALUES (";
-        data.forEach((pageResults) => {
-            pageResults.forEach((shoe) => {
-                // TODO: what if the title has a " ' " in it? 
-                let url = "'" + shoe.url + "'";
-                let title = "'" + shoe.title + "'"; 
-                let price = parseFloat(shoe.price.replace(/[$,]+/g,""))
-                let q = baseQuery + url + " ,'craigslist', " + title + " ," + price + ")"
-                console.log(q)
-                insertQueries.push(q)
-            })
-        })
-        // Insert into table
-        insertQueries.forEach((query) => {
-            connection.query(query, (err, result) => {
-                // Need to handle errors properly
-                if (err) throw err;
-                console.log("1 record inserted");
-            });
-        })
-    }
 }
 
 module.exports = Craigslist;

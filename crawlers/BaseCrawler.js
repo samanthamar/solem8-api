@@ -11,10 +11,6 @@ class BaseCrawler {
         throw new Error("NotImplementedError")
     }; 
 
-    insert() {
-        throw new Error("NotImplementedError")
-    }
-
 }
 
 module.exports = BaseCrawler;

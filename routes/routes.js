@@ -3,22 +3,35 @@ const rp = require('request-promise');
 const $ = require('cheerio');
 const db = require('./../db');
 const Craigslist = require('./../crawlers/Craigslist');
+const BaseShoe = require('./../models/BaseShoe')
 
 // THIS FILE CONTAINS ALL THE ENDPOINT LOGIC 
-
-// Test route
+// base route to handle '/'
 router.get('/', (req, res) => {
   res.status(200).json({ message: 'Your backend is working!' });
 });
 
+// Return all shoes from DB 
+// TODO: add filtering when getting shoes from DB
+router.get('/shoes', (req, res) => {
+    let q = "SELECT * FROM shoes"
+    db.query(q, (err, result) => {
+        if (err) throw err; 
+        console.log('Successfully retrieved records');
+        res.send({
+            shoes: result
+        });
+    });
+});
+
 // Scrape Craigslist 
 router.get('/craigslist', (req, res) => {
-    let model = req.query.model.toLowerCase();
-    let size = req.query.size.toLowerCase();
+    let baseShoe = new BaseShoe(req.query.model.toLowerCase(),
+                                req.query.size.toLowerCase())
+    let searchParams = baseShoe.model+"+"+"size"+"+"+baseShoe.size // ie.Yeezy+desert+size+9
     // TODO: 
     // Define location somewhere
     // let location = req.query.location.toLowerCase(); 
-    let searchParams = model+"+"+"size"+"+"+size // ie.Yeezy+desert+size+9
     craigslistUrl = 'https://toronto.craigslist.org/search/sss?query='+searchParams+'&sort=rel'+'&searchNearby=1'
     // request promise
     rp(craigslistUrl)
@@ -27,8 +40,7 @@ router.get('/craigslist', (req, res) => {
         // Get total num of results
         let numTotalResults = parseInt($('.totalcount', html).first().text());
         // Debugging
-        console.log("Num of results:" + numTotalResults)
-  
+        console.log("-------------Num of results:" + numTotalResults)
         // Put me somewhere else
         const urls =  (numOfResults, searchParams) => {
           // Limited to Toronto
@@ -52,18 +64,23 @@ router.get('/craigslist', (req, res) => {
         }
         // Get list of all urls to visit
         let resultsUrls = urls(numTotalResults, searchParams)
-        return resultsUrls; 
+
+        let returnMap = {
+            urls: resultsUrls, 
+            shoeObject: baseShoe
+        };
+        return returnMap;  
     }) 
-    .then((urls) => {
+    .then((returnMap) => {
         // From each result page, get the urls to each post
         let promiseCount = 0; 
         return Promise.all(
-          urls.map((url) => {
+          returnMap.urls.map((url) => {
             let cl = new Craigslist(url); 
             promiseCount++;
             console.log("-----------------------------------Promise.all count: " + promiseCount);
-            console.log(url)
-            return cl.crawl()
+            console.log(url);
+            return cl.crawl(returnMap.shoeObject);
           })
         )
     })
@@ -71,10 +88,8 @@ router.get('/craigslist', (req, res) => {
         let cl = new Craigslist();
         var json = {
           status: 200, 
-          shoeUrls: results
+          shoes: results
         }
-        // Insert into DB
-        cl.insert(db, results)
         // Output JSON reponse 
         res.send(json);
         console.log('Successfully scraped')
@@ -84,28 +99,5 @@ router.get('/craigslist', (req, res) => {
       console.log(error)
     })
   });
-
-router.get('/getCrawlData', (req, res) => {
-    // Currently, all records are returned from the crawlData table. 
-    // Need to add filtering! 
-    // TODO: figure out which params to request to query DB
-    // let id = parseInt(req.query.id.toLowerCase()); 
-    // let source = req.query.source.toLowerCase(); 
-    // let size = req.query.size.toLowerCase(); 
-    // let model = req.query.size.toLowerCase(); 
-    let query = "select * from crawlData"; 
-    db.query(query, (err, result) => {
-        // Need to handle errors properly
-        if (err) throw err;
-        // console.log(result);
-        console.log("Records successfully retreived")
-        let json = {
-            status: 200, 
-            records: result
-        }
-        // Output JSON reponse 
-        res.send(json)
-    });
-}); 
 
 module.exports = router;
