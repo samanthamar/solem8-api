@@ -50,6 +50,7 @@ class Craigslist extends BaseCrawler {
                         if (hasPhoto) {
                             // TODO: FIGURE OUT HOW TO GET PHOTO SRC
                             // It's nested weird
+                            console.log("---------PHOTO:")
                         }
                         console.log("-----------pushing shoes into list")
                         shoes.push(new Shoe(baseShoe.model, baseShoe.size, url, 'craigslist', title, price));
