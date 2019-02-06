@@ -17,6 +17,8 @@ Return shoes from DB: `localhost:3000/shoes/`
 **LocalDB:**
 Execute the following to create the appropriate local DB and table:
 
+`GRANT ALL PRIVILEGES ON *.* TO 'solem8_server'@'localhost' IDENTIFIED BY 'syde2020'`
+
 `create database solem8;`
 
 `create table shoes (id int NOT NULL AUTO_INCREMENT, model varchar (50), size float,  url varchar(100), source varchar(50), title varchar(100), price float, PRIMARY KEY(id));`
