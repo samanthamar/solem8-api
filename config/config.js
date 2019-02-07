@@ -3,15 +3,16 @@ const dotenv = require('dotenv');
 dotenv.config({ path: './config/.env' });
 
 env_vars = {};
+console.log(process.env.NODE_ENV);
 switch(process.env.NODE_ENV){
     // case 'dev':
-    //     console.log(1);
     //     env_vars =  {
     //         port: process.env.DEV_PORT,
     //         mysql_host: process.env.DEV_MYSQL_HOST,
     //         mysql_user: process.env.DEV_MYSQL_USER,
     //         mysql_password: process.env.DEV_MYSQL_PASSWORD,
-    //         mysql_db: process.env.DEV_MYSQL_DB
+    //         mysql_db: process.env.DEV_MYSQL_DB,
+    //         mysql_port: process.env.DEV_MYSQL_PORT
     //     };
     //     break;
     default:
@@ -21,7 +22,8 @@ switch(process.env.NODE_ENV){
             mysql_host: process.env.LOCAL_MYSQL_HOST,
             mysql_user: process.env.LOCAL_MYSQL_USER,
             mysql_password: process.env.LOCAL_MYSQL_PASSWORD,
-            mysql_db: process.env.LOCAL_MYSQL_DB
+            mysql_db: process.env.LOCAL_MYSQL_DB,
+            mysql_port: process.env.LOCAL_MYSQL_PORT
         };
         break;
 }
