@@ -1,10 +1,12 @@
 const mysql = require('mysql');
+const { mysql_host, mysql_user, mysql_password, mysql_db } = require('./config/config');
 
+// Setup connection
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'solem8_server',
-    password: 'syde2020',
-    database: 'solem8'
+    host: mysql_host,
+    user: mysql_user,
+    password: mysql_password,
+    database: mysql_db
   });
 
 // Connect to DB
