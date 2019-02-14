@@ -22,6 +22,15 @@ router.get('/shoes', (req, res) => {
             shoes: result
         });
     });
+
+    // let q2 = "show databases"
+    // db.query(q2, (err, result) => {
+    //     if (err) throw err; 
+    //     console.log('Successfully retrieved records');
+    //     res.send({
+    //         databases: result
+    //     });
+    // });
 });
 
 // Scrape Craigslist 
@@ -29,6 +38,7 @@ router.get('/craigslist', (req, res) => {
     let baseShoe = new BaseShoe(req.query.model.toLowerCase(),
                                 req.query.size.toLowerCase())
     let searchParams = baseShoe.model+"+"+"size"+"+"+baseShoe.size // ie.Yeezy+desert+size+9
+
     // TODO: 
     // Define location somewhere
     // let location = req.query.location.toLowerCase(); 

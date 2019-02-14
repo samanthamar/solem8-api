@@ -4,12 +4,14 @@
   "description": "RESTFUL api that scrapes the web for hype sneakers",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
   },
   "author": "skmar@uwaterloo.ca",
   "license": "ISC",
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
+    "dotenv": "^6.2.0",
     "express": "^4.16.4",
     "mysql": "^2.16.0",
     "request": "^2.88.0",
