@@ -11,7 +11,7 @@ switch(process.env.NODE_ENV){
             mysql_host: process.env.RDS_HOSTNAME,
             mysql_user: process.env.RDS_USERNAME,
             mysql_password: process.env.RDS_PASSWORD,
-            mysql_db: process.env.DEV_MYSQL_DB,
+            mysql_db: process.env.DB_NAME,
             mysql_port: process.env.MYSQL_PORT
         };
         break;
@@ -21,7 +21,7 @@ switch(process.env.NODE_ENV){
             mysql_host: process.env.LOCAL_MYSQL_HOST,
             mysql_user: process.env.LOCAL_MYSQL_USER,
             mysql_password: process.env.LOCAL_MYSQL_PASSWORD,
-            mysql_db: process.env.LOCAL_MYSQL_DB,
+            mysql_db: process.env.DB_NAME,
             mysql_port: process.env.MYSQL_PORT
         };
         break;
