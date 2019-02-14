@@ -14,23 +14,23 @@ router.get('/', (req, res) => {
 // Return all shoes from DB 
 // TODO: add filtering when getting shoes from DB
 router.get('/shoes', (req, res) => {
-    // let q = "SELECT * FROM shoes"
-    // db.query(q, (err, result) => {
-    //     if (err) throw err; 
-    //     console.log('Successfully retrieved records');
-    //     res.send({
-    //         shoes: result
-    //     });
-    // });
-
-    let q2 = "show databases"
-    db.query(q2, (err, result) => {
+    let q = "SELECT * FROM shoes"
+    db.query(q, (err, result) => {
         if (err) throw err; 
         console.log('Successfully retrieved records');
         res.send({
-            databases: result
+            shoes: result
         });
     });
+
+    // let q2 = "show databases"
+    // db.query(q2, (err, result) => {
+    //     if (err) throw err; 
+    //     console.log('Successfully retrieved records');
+    //     res.send({
+    //         databases: result
+    //     });
+    // });
 });
 
 // Scrape Craigslist 
