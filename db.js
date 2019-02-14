@@ -7,7 +7,7 @@ const connection = mysql.createConnection({
     user: mysql_user,
     password: mysql_password,
     db_port: mysql_port,
-    database: 'solem8'
+    database: mysql_db
   });
 
 // Connect to DB
