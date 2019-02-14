@@ -7,23 +7,22 @@ console.log(process.env.NODE_ENV);
 switch(process.env.NODE_ENV){
     case 'dev':
         env_vars =  {
-            port: process.env.DEV_PORT,
+            port: process.env.PORT,
             mysql_host: process.env.RDS_HOSTNAME,
             mysql_user: process.env.RDS_USERNAME,
             mysql_password: process.env.RDS_PASSWORD,
             mysql_db: process.env.RDS_DB_NAME,
-            mysql_port: process.env.DEV_MYSQL_PORT
+            mysql_port: process.env.MYSQL_PORT
         };
         break;
     default:
-        console.log(2);
         env_vars = {
-            port: process.env.LOCAL_PORT,
+            port: process.env.PORT,
             mysql_host: process.env.LOCAL_MYSQL_HOST,
             mysql_user: process.env.LOCAL_MYSQL_USER,
             mysql_password: process.env.LOCAL_MYSQL_PASSWORD,
             mysql_db: process.env.LOCAL_MYSQL_DB,
-            mysql_port: process.env.LOCAL_MYSQL_PORT
+            mysql_port: process.env.MYSQL_PORT
         };
         break;
 }
