@@ -8,10 +8,10 @@ switch(process.env.NODE_ENV){
     case 'dev':
         env_vars =  {
             port: process.env.DEV_PORT,
-            mysql_host: process.env.DEV_MYSQL_HOST,
-            mysql_user: process.env.DEV_MYSQL_USER,
-            mysql_password: process.env.DEV_MYSQL_PASSWORD,
-            mysql_db: process.env.DEV_MYSQL_DB,
+            mysql_host: process.env.RDS_HOSTNAME,
+            mysql_user: process.env.RDS_USERNAME,
+            mysql_password: process.env.RDS_PASSWORD,
+            mysql_db: process.env.RDS_DB_NAME,
             mysql_port: process.env.DEV_MYSQL_PORT
         };
         break;
