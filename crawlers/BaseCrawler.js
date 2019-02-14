@@ -3,6 +3,7 @@
 class BaseCrawler {
 
     constructor(url) {
+        // Give give the crawler the initial  url to crawl
         this.url = url;
         // this.keywords = keywords; 
     }   
