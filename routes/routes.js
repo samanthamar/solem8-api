@@ -4,6 +4,7 @@ const $ = require('cheerio');
 const db = require('./../db');
 const Craigslist = require('./../crawlers/Craigslist');
 const BaseShoe = require('./../models/BaseShoe')
+const puppeteer = require('puppeteer');
 
 // THIS FILE CONTAINS ALL THE ENDPOINT LOGIC 
 // base route to handle '/'
@@ -25,6 +26,7 @@ router.get('/shoes', (req, res) => {
 });
 
 // Scrape Craigslist 
+// Need to re-write
 router.get('/craigslist', (req, res) => {
     let baseShoe = new BaseShoe(req.query.model.toLowerCase(),
                                 req.query.size.toLowerCase())
@@ -85,7 +87,6 @@ router.get('/craigslist', (req, res) => {
         )
     })
     .then((results) => {
-        let cl = new Craigslist();
         var json = {
           status: 200, 
           shoes: results

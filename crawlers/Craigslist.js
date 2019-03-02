@@ -9,7 +9,10 @@ class Craigslist extends BaseCrawler {
     constructor(url) {
         super(url); 
     }
-
+    // TODO: 
+    // This is flawed such that a browser instance will launch for each 
+    // result page. If there were 100s of result pages, 100s of browser instances
+    // would be created and that would be B A D!!!
     crawl(baseShoe) {
         return puppeteer.launch()
         .then((browser) => {
@@ -25,7 +28,6 @@ class Craigslist extends BaseCrawler {
             let pagePhotoFlag = false; 
             // Scrape logic goes in here
             console.log('----------Successfully loaded html content')
-            // console.log(html); 
 
             // Get number of results
             let numResults = this.getNumResults(html); 
@@ -87,9 +89,7 @@ class Craigslist extends BaseCrawler {
             shoeObjects.forEach((shoe) => {
                 shoe.insert();
             })
-
             return shoeObjects;
-
         })
         .catch((err) => {
             // Handle error properly
@@ -131,92 +131,6 @@ class Craigslist extends BaseCrawler {
         return numResults; 
     }
 
-//     crawl(baseShoe) {
-//         return rp(this.url)
-//             .then((html) => {
-//                 console.log(baseShoe)
-//                 // (rangeFrom - rangeTo)
-//                 let rangeFrom = parseInt($('.rangeFrom',html).first().text()); 
-//                 let rangeTo = parseInt($('.rangeTo',html).first().text()); 
-//                 let numResults =0; 
-    
-//                 // Hacky 
-//                 if (rangeFrom == 1) {
-//                     numResults = rangeTo; 
-//                 } else {
-//                     numResults = rangeTo - rangeFrom; 
-//                 }
-//                 let shoes =[]
-//                 // console.log("----------------------------numResults: "+numResults);
-//                 for(let i=0; i<numResults; i++){
-//                     // If there is a price for the shoe, there will be an element with class name 'result-price'
-//                     // Here, we are checking what the class name of the next element is 
-//                     let resultMetaFirstClass = $('span.result-meta', html)[i].children[0].next.children[0].parent.attribs.class
-//                     // console.log($('span.result-meta', html)[i].children[0].next.children[0].parent)
-    
-//                     // Only add shoe if price data is available
-//                     // This was a pain in the ass to figure out
-//                     if (resultMetaFirstClass=='result-price') {
-//                         let url = $('a.result-title.hdrlnk', html)[i].attribs.href;
-//                         let title = $('a.result-title.hdrlnk', html)[i].children[0].data;
-//                         let price = $('span.result-meta', html)[i].children[0].next.children[0].parent.children[0].data;
-                        
-//                         // INCOMPLETE
-//                         // Check if post has photo
-//                         let resultRowLinkClass = $('li.result-row > a', html)[i].attribs.class;
-//                         let hasPhoto = false; 
-//                         let photo =  null;
-//                         if (resultRowLinkClass == 'result-image gallery') {
-//                             hasPhoto = true;
-//                         }
-//                         if (hasPhoto) {
-//                             // TODO: FIGURE OUT HOW TO GET PHOTO SRC
-//                             // It's nested weird
-//                             // console.log("---------PHOTO:")
-//                             // console.log($('.result-image.gallery', html)[i].children)
-//                             console.log('Post has photo')
-//                             getPhoto(url)
-//                         }
-//                         console.log("-----------pushing shoes into list")
-//                         shoes.push(new Shoe(baseShoe.model, baseShoe.size, url, 'craigslist', title, price));
-//                     }
-       
-//                 }
-
-//                 // insert each shoe into DB
-//                 shoes.forEach((shoe) => {
-//                     shoe.insert();
-//                 });
-
-//                 return shoes;
-
-//             })
-//             .catch((err) => {
-//                 // handle error
-//                 console.log(err);
-//             });
-//     };
-
-//     // This might be a better way to launch the page. We would just use 
-//     // Cheerio to parse the html 
-//     getPhoto(url) {
-//         puppeteer
-//             .launch() // launch headless browser
-//             .then((browser) => {
-//                 return browser.newPage(); // create a new page object
-//             })
-//             .then((page) => {
-//                 return page.goto(url); // go to page
-//             })
-//             .then(() => {
-//                 return page.content(); // 
-//             })
-//             .then((html) => {
-//                 console.log($('a.result-image.gallery',html)
-//             }); 
-
-
-//     }
-}
+  }
 
 module.exports = Craigslist;
