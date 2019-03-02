@@ -2,12 +2,13 @@ const BaseShoe = require('./BaseShoe');
 const db = require('./../db'); 
 
 class Shoe extends BaseShoe {
-    constructor(model, size, url, source, title, price) {
+    constructor(model, size, url, source, title, price, photo) {
         super(model, size);
         this.url = url; 
         this.source = source; 
         this.title = title; 
         this.price = price;
+        this.photo = photo; 
     }
 
     insert() {
@@ -19,11 +20,12 @@ class Shoe extends BaseShoe {
         let source = "'" + this.source + "'";
         let title = "'" + this.title + "'"; 
         let price = parseFloat(this.price.replace(/[$,]+/g,""))
+        let photo = "'" + this.photo + "'";
 
         // Build the query
-        let baseQuery = "INSERT INTO shoes (model, size, url, source, title, price) VALUES (";
-        let q = baseQuery + model + " ," + size + " ," + url + " ," + source
-        q += " ," + title + " ," + price + ")"
+        let baseQuery = "INSERT INTO shoes (model, size, url, source, title, price, photo) VALUES (";
+        let q = baseQuery + model + " ," + size + " ," + url + " ," + source 
+        q += " ," + title + " ," + price + " ," + photo + ")"
         
         console.log(q)
       
