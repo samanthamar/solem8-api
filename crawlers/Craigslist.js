@@ -2,6 +2,7 @@ const rp = require('request-promise');
 const $ = require('cheerio');
 const BaseCrawler = require('./BaseCrawler');
 const Shoe = require('./../models/Shoe');
+const puppeteer = require('puppeteer');
 
 class Craigslist extends BaseCrawler {
 
@@ -50,9 +51,10 @@ class Craigslist extends BaseCrawler {
                         if (hasPhoto) {
                             // TODO: FIGURE OUT HOW TO GET PHOTO SRC
                             // It's nested weird
-                            console.log("---------PHOTO:")
-                            // console.log($('.result-image.gallery', html)[i])
-                            console.log($('.result-image.gallery', html)[i].children)
+                            // console.log("---------PHOTO:")
+                            // console.log($('.result-image.gallery', html)[i].children)
+                            console.log('Post has photo')
+                            getPhoto(url)
                         }
                         console.log("-----------pushing shoes into list")
                         shoes.push(new Shoe(baseShoe.model, baseShoe.size, url, 'craigslist', title, price));
@@ -73,6 +75,27 @@ class Craigslist extends BaseCrawler {
                 console.log(err);
             });
     };
+
+    // This might be a better way to launch the page. We would just use 
+    // Cheerio to parse the html 
+    getPhoto(url) {
+        puppeteer
+            .launch() // launch headless browser
+            .then((browser) => {
+                return browser.newPage(); // create a new page object
+            })
+            .then((page) => {
+                return page.goto(url); // go to page
+            })
+            .then(() => {
+                return page.content(); // 
+            })
+            .then((html) => {
+                console.log($('a.result-image.gallery',html)
+            }); 
+
+
+    }
 }
 
 module.exports = Craigslist;
