@@ -25,7 +25,7 @@ router.get('/shoes', (req, res) => {
     });
 });
 
-router.get('/craigslist2', (req, res) => {
+router.get('/craigslist', (req, res) => {
 
   // Create the baseurl
   let baseShoe = new BaseShoe(req.query.model.toLowerCase(),
@@ -39,6 +39,7 @@ router.get('/craigslist2', (req, res) => {
   puppeteer
     .launch()
     .then((browser) => {
+      console.log("-----------LAUNCHING PHANTOM BROWSER");
       cBrowser = browser; 
     })
     .then(() => {
@@ -46,8 +47,10 @@ router.get('/craigslist2', (req, res) => {
     })
     .then((page) => {
       // Create new Craigslist crawler object 
-      cl = new Craigslist(craigslistUrl, page, searchParams, baseShoe); 
-      cl.crawl().then((results) => {
+      cl = new Craigslist(craigslistUrl, page, baseShoe); 
+      // Initiate the crawl
+      cl.crawl()
+        .then((results) => {
         var json = {
           status: 200, 
           shoes: results 
@@ -61,84 +64,12 @@ router.get('/craigslist2', (req, res) => {
       })
   })
   .catch((err) => {
-    console.log(err);
+    var json = {
+      status: 200, 
+      error: err 
+    }
+    res.send(json)
   })
-})
-
-// Scrape Craigslist 
-// Need to re-write
-// router.get('/craigslist', (req, res) => {
-//     let baseShoe = new BaseShoe(req.query.model.toLowerCase(),
-//                                 req.query.size.toLowerCase())
-//     let searchParams = baseShoe.model+"+"+"size"+"+"+baseShoe.size // ie.Yeezy+desert+size+9
-//     // TODO: 
-//     // Define location somewhere
-//     // let location = req.query.location.toLowerCase(); 
-//     craigslistUrl = 'https://toronto.craigslist.org/search/sss?query='+searchParams+'&sort=rel'+'&searchNearby=1'
-//     // request promise
-//     rp(craigslistUrl)
-//       // gets the html
-//       .then((html) => {
-//         // Get total num of results
-//         let numTotalResults = parseInt($('.totalcount', html).first().text());
-//         // Debugging
-//         console.log("-------------Num of results:" + numTotalResults)
-//         // Put me somewhere else
-//         const urls =  (numOfResults, searchParams) => {
-//           // Limited to Toronto
-//           let baseUrl = 'https://toronto.craigslist.org/search/sss?query='
-//           let pageUrls = []; 
-//           // Craigslist lists a max of 120 posts/page
-//           if (numOfResults < 120){
-//               pageUrls.push(baseUrl+searchParams+'&sort=rel'+'&searchNearby=1')
-//           } else {
-//               let numPagesToCrawl = Math.floor(numOfResults/120);
-//               console.log("Pages to crawl: " + numPagesToCrawl)
-//               for (let i=0; i<=numPagesToCrawl; i++){
-//               if (i==0) {
-//                   pageUrls.push(baseUrl+searchParams+'&sort=rel'+'&searchNearby=1')
-//               } else if (i==1){
-//                   pageUrls.push(baseUrl+searchParams+'&s='+(i*120).toString()+'&sort=rel'+'&searchNearby=1')
-//               }
-//             }
-//           }
-//           return pageUrls;
-//         }
-//         // Get list of all urls to visit
-//         let resultsUrls = urls(numTotalResults, searchParams)
-
-//         let returnMap = {
-//             urls: resultsUrls, 
-//             shoeObject: baseShoe
-//         };
-//         return returnMap;  
-//     }) 
-//     .then((returnMap) => {
-//         // From each result page, get the urls to each post
-//         let promiseCount = 0; 
-//         return Promise.all(
-//           returnMap.urls.map((url) => {
-//             let cl = new Craigslist(url); 
-//             promiseCount++;
-//             console.log("-----------------------------------Promise.all count: " + promiseCount);
-//             console.log(url);
-//             return cl.crawl(returnMap.shoeObject);
-//           })
-//         )
-//     })
-//     .then((results) => {
-//         var json = {
-//           status: 200, 
-//           shoes: results
-//         }
-//         // Output JSON reponse 
-//         res.send(json);
-//         console.log('Successfully scraped')
-//     })
-//     .catch((error) => {
-//       // handle this error
-//       console.log(error)
-//     })
-//   });
+});
 
 module.exports = router;
