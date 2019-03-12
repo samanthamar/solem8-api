@@ -136,12 +136,16 @@ cronCrawl = () => {
         });
 }
 
-cronCount = 0; 
-cron.schedule('*/1 * * * *', () => {
-    cronCount++; 
-    console.log(`------------------Initiating crawl # ${cronCount}`);
-    cronCrawl(); 
-  });
+scheduledCrawl = () => {
+    cronCount = 0; 
+    cron.schedule('*/1 * * * *', () => {
+        cronCount++; 
+        console.log(`------------------Initiating crawl # ${cronCount}`);
+        cronCrawl(); 
+        });
+};
+
+module.exports = crawl;
 
 
 
