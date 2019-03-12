@@ -75,7 +75,7 @@ updateShoeTable = (searches, data) => {
                array.forEach((subarray) => {
                    subarray.forEach((shoe) => {
                        console.log(shoe)
-                       data.insert()
+                       shoe.insert()
                    })
                })
          })
@@ -106,33 +106,44 @@ deleteEntries = (model, size) => {
     })
 }
 
-console.log("crawl.js working")
 // Sanity checks 
 // console.log(getSearches())
 // console.log(crawl("yeezy", 10));
 
 // Below is what the cron job will need to do!!!
-let searches; 
-getSearches()
-    .then((results) => {
-        searches = results; 
-        // For each url, scrape the data
-        return Promise.all(
-           results.map((search) => {
-                return crawl(search.model, search.size)
-        })).then((data)=> {
-            // Debugging
-            console.log("-----ALL PROMISES FULFILLED")
-            console.log(data)
-            console.log(searches)
-            updateShoeTable(searches, data)
 
+cronCrawl = () => {
+    let searches; 
+    getSearches()
+        .then((results) => {
+            searches = results; 
+            // For each url, scrape the data
+            return Promise.all(
+            results.map((search) => {
+                    return crawl(search.model, search.size)
+            })).then((data)=> {
+                // Debugging
+                console.log("-----ALL PROMISES FULFILLED")
+                console.log(data)
+                console.log(searches)
+                updateShoeTable(searches, data)
+
+            })
         })
-    })
-    .catch((err) => {
-        // Handle error properly
-        console.log(err)
-    });
+        .catch((err) => {
+            // Handle error properly
+            console.log(err)
+        });
+}
+
+cronCount = 0; 
+cron.schedule('*/1 * * * *', () => {
+    cronCount++; 
+    console.log(`------------------Initiating crawl # ${cronCount}`);
+    cronCrawl(); 
+  });
+
+
 
 
 
