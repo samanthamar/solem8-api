@@ -11,7 +11,10 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
     "express": "^4.16.4",
+    "install": "^0.12.2",
     "mysql": "^2.16.0",
+    "node-cron": "^2.0.3",
+    "npm": "^6.9.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.2"
   }

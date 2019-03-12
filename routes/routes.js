@@ -1,6 +1,5 @@
 const router = require('express').Router();
 const rp = require('request-promise');
-const $ = require('cheerio');
 const db = require('./../db');
 const Craigslist = require('./../crawlers/Craigslist');
 const BaseShoe = require('./../models/BaseShoe');
@@ -29,7 +28,7 @@ router.get('/craigslist', (req, res) => {
 
   // Create the baseurl
   let baseShoe = new BaseShoe(req.query.model.toLowerCase(),
-  req.query.size.toLowerCase())
+                              req.query.size.toLowerCase())
   let searchParams = baseShoe.model+"+"+"size"+"+"+baseShoe.size // ie.Yeezy+desert+size+9
   // Limited to Toronto
   craigslistUrl = 'https://toronto.craigslist.org/search/sss?query='+searchParams+'&sort=rel'+'&searchNearby=1'
