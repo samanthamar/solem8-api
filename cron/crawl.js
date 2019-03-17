@@ -141,6 +141,7 @@ scheduledCrawl = () => {
     cron.schedule('*/1 * * * *', () => {
         cronCount++; 
         console.log(`------------------Initiating crawl # ${cronCount}`);
+        console.log(Date.now()) 
         cronCrawl(); 
         });
 };
