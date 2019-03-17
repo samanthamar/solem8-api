@@ -1,8 +1,8 @@
-const rp = require('request-promise');
+// const rp = require('request-promise');
 const $ = require('cheerio');
 const BaseCrawler = require('./BaseCrawler');
 const Shoe = require('./../models/Shoe');
-const puppeteer = require('puppeteer');
+// const puppeteer = require('puppeteer');
 
 class Craigslist extends BaseCrawler {
 
@@ -83,6 +83,8 @@ class Craigslist extends BaseCrawler {
                 if (resultMetaFirstClass=='result-price') {
                     let url = $('a.result-title.hdrlnk', html)[i].attribs.href;
                     let title = $('a.result-title.hdrlnk', html)[i].children[0].data;
+                    // Occasionally run into error if title contains " ' ", replace it with ""
+                    title = title.replace("'",""); 
                     let price = $('span.result-meta', html)[i].children[0].next.children[0].parent.children[0].data;
                     let photoFlag = false; 
 

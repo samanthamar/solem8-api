@@ -96,7 +96,7 @@ deleteEntries = (model, size) => {
         db.query(q, (err, results) => {
             // Need to handle errors properly
             if (err) {
-                console.log("Error retrieving deleting from table")
+                console.log("Error deleting from table")
                 reject(err); 
             } else if (results) {
                 console.log("Successfully deleted rows");

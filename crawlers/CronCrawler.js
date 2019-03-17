@@ -36,6 +36,9 @@ class CronCrawler extends Craigslist {
                 if (resultMetaFirstClass=='result-price') {
                     let url = $('a.result-title.hdrlnk', html)[i].attribs.href;
                     let title = $('a.result-title.hdrlnk', html)[i].children[0].data;
+                    // Occasionally run into error if title contains " ' ", replace it with ""
+                    title = title.replace(/'/g,"").replace(); 
+                    console.log(title)
                     let price = $('span.result-meta', html)[i].children[0].next.children[0].parent.children[0].data;
                     let photoFlag = false; 
 
