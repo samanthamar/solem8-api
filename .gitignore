@@ -77,4 +77,4 @@ typings/
 .fusebox/
 
 # DynamoDB Local files
-.dynamodb/
+.dynamodb/sendgrid.env

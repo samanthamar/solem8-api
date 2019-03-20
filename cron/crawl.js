@@ -4,6 +4,9 @@ const cron = require('node-cron');
 const BaseShoe = require('./../models/BaseShoe');
 const cronCrawler = require('./../crawlers/CronCrawler');
 require('./../models/Shoe');
+const sgMail = require('@sendgrid/mail'); 
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+cronCount = 0; 
 
 getSearches = () => {
     return new Promise((resolve, reject) => {
@@ -127,6 +130,13 @@ cronCrawl = () => {
                 console.log(data)
                 console.log(searches)
                 updateShoeTable(searches, data)
+                const msg = {
+                    to: 'solem8api@gmail.com',
+                    from: 'solem8api@gmail.com', 
+                    subject: `Successfully completed crawl # ${cronCount}`,
+                    text: `Cron crawl job #${cronCount} successfully completed.`
+                  };
+                sgMail.send(msg);
 
             })
         })
@@ -137,10 +147,17 @@ cronCrawl = () => {
 }
 
 scheduledCrawl = () => {
-    cronCount = 0; 
-    cron.schedule('*/15 * * * *', () => {
+    cron.schedule('*/2 * * * *', () => {
         cronCount++; 
         console.log(`------------------Initiating crawl # ${cronCount}`);
+        const msg = {
+            to: 'solem8api@gmail.com',
+            from: 'solem8api@gmail.com', 
+            subject: `Initiating crawl ${cronCount}`,
+            text: 'A crawl is being initiated'
+            // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+          };
+        sgMail.send(msg);
         cronCrawl(); 
         });
 };
