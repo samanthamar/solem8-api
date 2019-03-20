@@ -4,6 +4,8 @@ const db = require('./../db');
 const Craigslist = require('./../crawlers/Craigslist');
 const BaseShoe = require('./../models/BaseShoe');
 const puppeteer = require('puppeteer');
+const sgMail = require('@sendgrid/mail'); 
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // THIS FILE CONTAINS ALL THE ENDPOINT LOGIC 
 // base route to handle '/'
@@ -12,18 +14,46 @@ router.get('/', (req, res) => {
 });
 
 // Return all shoes from DB 
-// TODO: add filtering when getting shoes from DB
 router.get('/shoes', (req, res) => {
-    let q = "SELECT * FROM shoes"
-    db.query(q, (err, result) => {
-        if (err) throw err; 
-        console.log('Successfully retrieved records');
-        res.send({
-            shoes: result
-        });
+    let searchParams = {
+      model: req.query.model, // string
+      size: req.query.size, // float 
+      priceMin: req.query.priceMin, //float
+      priceMax: req.query.priceMax// float
+    } 
+
+    // Construct the query
+    let query = `SELECT * from shoes where model='${searchParams.model}' 
+                 and size='${searchParams.size}' 
+                 and price BETWEEN ${searchParams.priceMin} AND ${searchParams.priceMax}`
+    // Execute the query 
+    db.query(query, (err, result) => {
+        if (err) {
+          console.log(err)
+          res.send({
+            error: err
+          })
+          // Send an email with the error
+          const msg = {
+            to: 'solem8api@gmail.com',
+            from: 'solem8api@gmail.com', 
+            subject: '[ERROR] /shoes endpoint',
+            text: `There was an issue retrieving data from the shoes table: ${err}`
+          };
+          sgMail.send(msg);
+          
+        // If there are no results, the json response is {shoes: []} 
+        } else if (result) {
+          console.log("------SUCESSFULLY RETRIEVED RESULTS")
+          console.log(result)
+          res.send({
+            shoes: result 
+          })
+        }
     });
 });
 
+// This endpoint isn't actually used, for testing purposes 
 router.get('/craigslist', (req, res) => {
 
   // Create the baseurl
