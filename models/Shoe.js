@@ -24,9 +24,9 @@ class Shoe extends Model {
     };
   }
 
-  $beforeInsert() {
-    this.created_at = new Date().getTime().toString();
-  }
+  // $beforeInsert() {
+  //   this.created_at = new Date().getTime().toString();
+  // }
 }
 // class Shoe extends BaseShoe {
 //     constructor(model, size, url, source, title, price) {
