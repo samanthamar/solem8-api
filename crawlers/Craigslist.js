@@ -1,15 +1,14 @@
 const rp = require('request-promise');
 const $ = require('cheerio');
 const BaseCrawler = require('./BaseCrawler');
-const Shoe = require('./../models/Shoe');
-
+const ShoeController = require('../controller/ShoeController');
 class Craigslist extends BaseCrawler {
 
     constructor(url) {
         super(url); 
     }
 
-    crawl(baseShoe) {
+    async crawl(baseShoe) {
         return rp(this.url)
             .then((html) => {
                 console.log(baseShoe)
@@ -43,7 +42,7 @@ class Craigslist extends BaseCrawler {
                         // Check if post has photo
                         let resultRowLinkClass = $('li.result-row > a', html)[i].attribs.class;
                         let hasPhoto = false; 
-                        let photo =  null;
+                        let photo = '';
                         if (resultRowLinkClass == 'result-image gallery') {
                             hasPhoto = true;
                         }
@@ -55,16 +54,17 @@ class Craigslist extends BaseCrawler {
                             console.log($('.result-image.gallery', html)[i].children)
                         }
                         console.log("-----------pushing shoes into list")
-                        shoes.push(new Shoe(baseShoe.model, baseShoe.size, url, 'craigslist', title, price));
+                        var shoe_info = { model: baseShoe.model, size: parseFloat(baseShoe.size), url: url, source: 'craigslist', title: title, price: parseFloat(price.replace(/[$,]+/g,"")), photo: photo };
+                        shoes.push(shoe_info);
                     }
        
                 }
 
                 // insert each shoe into DB
-                shoes.forEach((shoe) => {
-                    shoe.insert();
+                const shoeController = new ShoeController();
+                shoes.forEach((shoe_info) => {
+                    shoeController.insert(shoe_info);
                 });
-
                 return shoes;
 
             })

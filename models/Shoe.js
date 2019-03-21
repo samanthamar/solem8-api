@@ -1,43 +1,32 @@
-const BaseShoe = require('./BaseShoe');
-const db = require('./../db'); 
+const connection = require('./../knexConnection'); 
 const { Model } = require('objection')
 
-Model.knex(db)
+Model.knex(connection)
 
 class Shoe extends Model {
-    static get tableName () {
-        return 'shoes'
-    }
+  static get tableName () {
+    return 'shoes';
+  }
 
-    static get jsonSchema () {
-        return {
-          type: 'object',
-          required: ['model'],
-    
-          properties: {
-            id: {type: 'integer'},
-            parentId: {type: ['integer', 'null']},
-            firstName: {type: 'string', minLength: 1, maxLength: 255},
-            lastName: {type: 'string', minLength: 1, maxLength: 255},
-            age: {type: 'number'},
-    
-            // Properties defined as objects or arrays are
-            // automatically converted to JSON strings when
-            // writing to database and back to objects and arrays
-            // when reading from database. To override this
-            // behaviour, you can override the
-            // Person.jsonAttributes property.
-            address: {
-              type: 'object',
-              properties: {
-                street: {type: 'string'},
-                city: {type: 'string'},
-                zipCode: {type: 'string'}
-              }
-            }
-          }
-        };
+  static get jsonSchema () {
+    return {
+      type: 'object',
+      properties: {
+        id: {type: 'integer'},
+        model: {type: 'string'},
+        size: {type: 'float'},
+        url: {type: 'string'},
+        source: {type: 'string'},
+        title: {type: 'string'},
+        price: {type: 'float'},
+        photo: {type: 'string'},
       }
+    };
+  }
+
+  $beforeInsert() {
+    this.created_at = new Date().getTime().toString();
+  }
 }
 // class Shoe extends BaseShoe {
 //     constructor(model, size, url, source, title, price) {

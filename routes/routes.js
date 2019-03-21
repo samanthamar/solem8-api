@@ -1,9 +1,9 @@
 const router = require('express').Router();
 const rp = require('request-promise');
 const $ = require('cheerio');
-const db = require('./../db');
 const Craigslist = require('./../crawlers/Craigslist');
-const BaseShoe = require('./../models/BaseShoe')
+const BaseShoe = require('./../models/BaseShoe');
+const ShoeController = require('../controller/ShoeController');
 
 // THIS FILE CONTAINS ALL THE ENDPOINT LOGIC 
 // base route to handle '/'
@@ -13,15 +13,24 @@ router.get('/', (req, res) => {
 
 // Return all shoes from DB 
 // TODO: add filtering when getting shoes from DB
-router.get('/shoes', (req, res) => {
-    let q = "SELECT * FROM shoes"
-    db.query(q, (err, result) => {
-        if (err) throw err; 
-        console.log('Successfully retrieved records');
-        res.send({
-            shoes: result
-        });
-    });
+router.get('/shoes', async (req, res) => {
+  // Returns shoes
+  shoeController = new ShoeController();
+  const shoes = await shoeController.getAllShoes();
+  // const shoes = await Shoe.query()
+  // .catch(err => {
+  //     console.log(err);
+  // });
+  res.json(shoes);
+
+    // let q = "SELECT * FROM shoes"
+    // db.query(q, (err, result) => {
+    //     if (err) throw err; 
+    //     console.log('Successfully retrieved records');
+    //     res.send({
+    //         shoes: result
+    //     });
+    // });
 
     // let q2 = "show databases"
     // db.query(q2, (err, result) => {
@@ -34,7 +43,7 @@ router.get('/shoes', (req, res) => {
 });
 
 // Scrape Craigslist 
-router.get('/craigslist', (req, res) => {
+router.get('/craigslist', async (req, res) => {
     let baseShoe = new BaseShoe(req.query.model.toLowerCase(),
                                 req.query.size.toLowerCase())
     let searchParams = baseShoe.model+"+"+"size"+"+"+baseShoe.size // ie.Yeezy+desert+size+9

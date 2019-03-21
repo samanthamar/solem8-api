@@ -4,7 +4,7 @@ dotenv.config({ path: './config/.env' });
 
 // Configure settings
 const settings = {
-  developement: {
+  development: {
     server: {
       port: 3000
     }
@@ -15,5 +15,5 @@ const settings = {
     }
   }
 }
-module.exports = settings
+module.exports = settings;
 

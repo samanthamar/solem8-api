@@ -9,8 +9,8 @@ exports.up = function(knex, Promise) {
           table.string('source')
           table.string('title')
           table.float('price')
-          table.string('photo')
-          table.datetime('created_at')
+          table.string('photo').nullable()
+          table.string('created_at')
         })
       ])
 };

@@ -10,7 +10,7 @@ module.exports = {
       database: process.env.DB_NAME,
       host: process.env.DEV_MYSQL_HOST,
       user: process.env.DEV_MYSQL_USER,
-      password: process.env.DEV_MYSQL_PASSWORD
+      password: process.env.DEV_MYSQL_PASSWORD,
     },
     migrations: {
       directory: __dirname + '/migrations',
@@ -23,7 +23,7 @@ module.exports = {
       database: process.env.DB_NAME,
       host: process.env.DEV_MYSQL_HOST,
       user: process.env.DEV_MYSQL_USER,
-      password: process.env.DEV_MYSQL_PASSWORD
+      password: process.env.DEV_MYSQL_PASSWORD,
     },
     pool: {
       min: 2,

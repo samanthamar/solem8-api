@@ -1,8 +1,8 @@
 const express = require('express'); 
 const app = express();
-const router = require('./routes/routes');
-const environment = process.env.NODE_ENV || 'development'
+const environment = process.env.NODE_ENV || 'development';
 const { port } = require('./config/config')[environment].server;
+const router = require('./routes/routes');
 
 // List routes here
 app.use('/', router);
