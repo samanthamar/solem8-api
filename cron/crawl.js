@@ -10,7 +10,7 @@ cronCount = 0;
 
 getSearches = () => {
     return new Promise((resolve, reject) => {
-        let q = "select distinct model, size from search"; 
+        let q = "select distinct model, size from supportedShoes"; 
         // Select from table
         db.query(q, (err, results) => {
             // Need to handle errors properly
@@ -147,7 +147,7 @@ cronCrawl = () => {
 }
 
 scheduledCrawl = () => {
-    cron.schedule('*/2 * * * *', () => {
+    cron.schedule('*/5 * * * *', () => {
         cronCount++; 
         console.log(`------------------Initiating crawl # ${cronCount}`);
         const msg = {
