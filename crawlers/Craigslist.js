@@ -20,6 +20,8 @@ class Craigslist extends BaseCrawler {
         .then((html) => {
             // Get total num of results
             let numTotalResults = parseInt($('.totalcount', html).first().text());
+            console.log("--------NUM TOTAL RESULTS");
+            console.log(numTotalResults);
             // Put me somewhere else
             const urls = (numOfResults) => {
                 let pageUrls = []; 

@@ -7,6 +7,7 @@ require('./../models/Shoe');
 const sgMail = require('@sendgrid/mail'); 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 cronCount = 0; 
+let cBrowser; 
 
 getSearches = () => {
     return new Promise((resolve, reject) => {
@@ -33,16 +34,19 @@ crawl = (model, size) => {
         let searchParams = baseShoe.model+"+"+"size"+"+"+baseShoe.size; // ie.Yeezy+desert+size+9
         // Limited to Toronto
         baseUrl = 'https://toronto.craigslist.org/search/sss?query='+searchParams+'&sort=rel'+'&searchNearby=1';
-        console.log(baseShoe)
+        console.log(baseUrl)
+        // console.log(baseShoe)
         // This is the browser for this request
-        let cBrowser; 
-        puppeteer
-            .launch()
-            .then((browser) => {
-                console.log("-----------LAUNCHING PHANTOM BROWSER");
-                cBrowser = browser; 
-                return cBrowser.newPage();
-            })
+        // let cBrowser; 
+        // puppeteer
+        //     .launch()
+        //     .then((browser) => {
+        //         console.log("-----------LAUNCHING PHANTOM BROWSER");
+        //         cBrowser = browser; 
+        //         return cBrowser.newPage();
+        //     })
+        cBrowser
+            .newPage()
             .then((page) => {
                 // Create new Craigslist crawler object 
                 cc = new cronCrawler(baseUrl, page, baseShoe); 
@@ -52,7 +56,7 @@ crawl = (model, size) => {
                     .then((results) => {
                         console.log(results) 
                         console.log("-------CLOSING BROWSER")
-                        cBrowser.close() 
+                        // cBrowser.close() 
                         resolve(results)
                 })
         })
@@ -130,13 +134,13 @@ cronCrawl = () => {
                 console.log(data)
                 console.log(searches)
                 updateShoeTable(searches, data)
-                const msg = {
-                    to: 'solem8api@gmail.com',
-                    from: 'solem8api@gmail.com', 
-                    subject: `Successfully completed crawl # ${cronCount}`,
-                    text: `Cron crawl job #${cronCount} successfully completed.`
-                  };
-                sgMail.send(msg);
+                // const msg = {
+                //     to: 'solem8api@gmail.com',
+                //     from: 'solem8api@gmail.com', 
+                //     subject: `Successfully completed crawl # ${cronCount}`,
+                //     text: `Cron crawl job #${cronCount} successfully completed.`
+                //   };
+                // sgMail.send(msg);
 
             })
         })
@@ -150,15 +154,24 @@ scheduledCrawl = () => {
     cron.schedule('*/5 * * * *', () => {
         cronCount++; 
         console.log(`------------------Initiating crawl # ${cronCount}`);
-        const msg = {
-            to: 'solem8api@gmail.com',
-            from: 'solem8api@gmail.com', 
-            subject: `Initiating crawl ${cronCount}`,
-            text: 'A crawl is being initiated'
-            // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
-          };
-        sgMail.send(msg);
-        cronCrawl(); 
+        puppeteer
+            .launch()
+            .then((browser) => {
+            console.log("-----------CREATING BROWSER INSTANCE");
+                cBrowser = browser; 
+            })
+            .then(()=> {
+                cronCrawl(); 
+            })
+        // const msg = {
+        //     to: 'solem8api@gmail.com',
+        //     from: 'solem8api@gmail.com', 
+        //     subject: `Initiating crawl ${cronCount}`,
+        //     text: 'A crawl is being initiated'
+        //     // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+        //   };
+        // sgMail.send(msg);
+        // cronCrawl(); 
         });
 };
 
