@@ -1,15 +1,23 @@
-const db = require('./../db');  
+// Import required node modules
 const puppeteer = require('puppeteer');
 const cron = require('node-cron'); 
+const $q = require('q'); 
+
+const db = require('./../db');  
 const BaseShoe = require('./../models/BaseShoe');
 const cronCrawler = require('./../crawlers/CronCrawler');
 require('./../models/Shoe');
+
+// Sendgrid stuff
 const sgMail = require('@sendgrid/mail'); 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+// Global vars
 cronCount = 0; 
 let cBrowser; 
 
-getSearches = () => {
+// Database functions 
+const getSearches = () => {
     return new Promise((resolve, reject) => {
         let q = "select distinct model, size from supportedShoes"; 
         // Select from table
@@ -26,8 +34,67 @@ getSearches = () => {
     }); 
 }; 
 
-// Mostly copy and paste
-crawl = (model, size) => {
+
+const updateShoeTable = (searches, data) => {
+    Promise.all(
+        searches.map((search) => {
+            deleteEntries(search.model, search.size)
+     }))
+     .then(() => {
+         console.log("---WIPED OLD DATA")
+         // [[shoe,shoe,shoe],[]]
+         console.log(data.length)
+         data.forEach((array) => {
+               array.forEach((subarray) => {
+                   subarray.forEach((shoe) => {
+                    //    console.log(shoe)
+                       shoe.insert()
+                   })
+               })
+         })
+         console.log("---SUCCESSFULLY UPDATED DATA")
+     })
+     .catch((err) => {
+         // Handle err
+         console.log(err)
+     })
+
+}
+
+const deleteEntries = (model, size) => {
+    return new Promise((resolve, reject) => {
+        let q = "delete from shoes where " 
+        q += "model = " + `'${model}'` + " and size = " + parseFloat(size)
+        // console.log(q)
+        db.query(q, (err, results) => {
+            // Need to handle errors properly
+            if (err) {
+                console.log("Error deleting from table")
+                reject(err); 
+            } else if (results) {
+                console.log("Successfully deleted rows");
+                resolve(1)
+            }
+        });
+    })
+}
+
+// Split crawls into chunks 
+const chunk = (arr, len) => {
+
+    var chunks = [],
+        i = 0,
+        n = arr.length;
+  
+    while (i < n) {
+      chunks.push(arr.slice(i, i += len));
+    }
+  
+    return chunks;
+  }
+
+// This crawl function calls the crawler
+const crawl = (model, size) => {
     return new Promise((resolve, reject) => {
         // Create the baseurl
         let baseShoe = new BaseShoe(model.toLowerCase(), size);
@@ -54,8 +121,7 @@ crawl = (model, size) => {
                 cc.crawl()
                 // THE IMPORTANT DATA! 
                     .then((results) => {
-                        console.log(results) 
-                        console.log("-------CLOSING BROWSER")
+                        // console.log(results) 
                         // cBrowser.close() 
                         resolve(results)
                 })
@@ -69,89 +135,89 @@ crawl = (model, size) => {
     })
 };
 
-updateShoeTable = (searches, data) => {
-    Promise.all(
-        searches.map((search) => {
-            deleteEntries(search.model, search.size)
-     }))
-     .then(() => {
-         console.log("---WIPED OLD DATA")
-         // [[shoe,shoe,shoe],[]]
-         console.log(data.length)
-         data.forEach((array) => {
-               array.forEach((subarray) => {
-                   subarray.forEach((shoe) => {
-                       console.log(shoe)
-                       shoe.insert()
-                   })
-               })
-         })
-         console.log("---SUCCESSFULLY UPDATED DATA")
-     })
-     .catch((err) => {
-         // Handle err
-         console.log(err)
-     })
+// // Original
+// // Below is what the cron job will need to do!!!
+// const cronCrawl = () => {
+//     let searches; 
+//     getSearches()
+//         .then((results) => {
+//             searches = results; 
+//             // For each url, scrape the data
+//             return Promise.all(
+//             results.map((search) => {
+//                     return crawl(search.model, search.size)
+//             })).then((data)=> {
+//                 // Debugging
+//                 console.log("-----ALL PROMISES FULFILLED")
+//                 // console.log(data)
+//                 // console.log(searches)
+//                 updateShoeTable(searches, data)
+//                 // const msg = {
+//                 //     to: 'solem8api@gmail.com',
+//                 //     from: 'solem8api@gmail.com', 
+//                 //     subject: `Successfully completed crawl # ${cronCount}`,
+//                 //     text: `Cron crawl job #${cronCount} successfully completed.`
+//                 //   };
+//                 // sgMail.send(msg);
 
-}
+//             }).then(() => {
+//                 console.log("-------CLOSING BROWSER")
+//                 cBrowser.close();
+//             })
+//         })
+//         .catch((err) => {
+//             // Handle error properly
+//             console.log(err)
+//         });
+// }
 
-deleteEntries = (model, size) => {
-    return new Promise((resolve, reject) => {
-        let q = "delete from shoes where " 
-        q += "model = " + `'${model}'` + " and size = " + parseFloat(size)
-        console.log(q)
-        db.query(q, (err, results) => {
-            // Need to handle errors properly
-            if (err) {
-                console.log("Error deleting from table")
-                reject(err); 
-            } else if (results) {
-                console.log("Successfully deleted rows");
-                resolve(1)
-            }
-        });
-    })
-}
 
-// Sanity checks 
-// console.log(getSearches())
-// console.log(crawl("yeezy", 10));
-
-// Below is what the cron job will need to do!!!
-
-cronCrawl = () => {
-    let searches; 
-    getSearches()
-        .then((results) => {
-            searches = results; 
-            // For each url, scrape the data
-            return Promise.all(
-            results.map((search) => {
-                    return crawl(search.model, search.size)
-            })).then((data)=> {
-                // Debugging
-                console.log("-----ALL PROMISES FULFILLED")
-                console.log(data)
-                console.log(searches)
-                updateShoeTable(searches, data)
-                // const msg = {
-                //     to: 'solem8api@gmail.com',
-                //     from: 'solem8api@gmail.com', 
-                //     subject: `Successfully completed crawl # ${cronCount}`,
-                //     text: `Cron crawl job #${cronCount} successfully completed.`
-                //   };
-                // sgMail.send(msg);
-
-            })
+// 3 chunks at a time 
+const cronCrawl = (queue) => {
+    return Promise.all(
+        queue.map((search) => {
+                return crawl(search.model, search.size)
+        })).then((data)=> {
+            // Debugging
+            console.log("-----ALL PROMISES FULFILLED")
+            updateShoeTable(queue, data)
         })
         .catch((err) => {
-            // Handle error properly
             console.log(err)
-        });
-}
+        }) 
 
+}; 
+
+// Original
+// const scheduledCrawl = () => {
+//     cron.schedule('*/5 * * * *', () => {
+//         cronCount++; 
+//         console.log(`------------------Initiating crawl # ${cronCount}`);
+//         puppeteer
+//             .launch()
+//             .then((browser) => {
+//             console.log("-----------CREATING BROWSER INSTANCE");
+//                 cBrowser = browser; 
+//             })
+//             .then(()=> {
+//                 cronCrawl(); 
+//             })
+//         // const msg = {
+//         //     to: 'solem8api@gmail.com',
+//         //     from: 'solem8api@gmail.com', 
+//         //     subject: `Initiating crawl ${cronCount}`,
+//         //     text: 'A crawl is being initiated'
+//         //     // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+//         //   };
+//         // sgMail.send(msg);
+//         // cronCrawl(); 
+//         });
+// };
+
+
+// Task queue implementation
 scheduledCrawl = () => {
-    cron.schedule('*/5 * * * *', () => {
+    cron.schedule('*/2 * * * *', () => {
         cronCount++; 
         console.log(`------------------Initiating crawl # ${cronCount}`);
         puppeteer
@@ -161,7 +227,30 @@ scheduledCrawl = () => {
                 cBrowser = browser; 
             })
             .then(()=> {
-                cronCrawl(); 
+                console.log("-----------CREATING CHUNKS");
+                getSearches()
+                    .then((results) => {
+                        // Create chunks of 3
+                        // 3 is the number of concurrent, async crawls 
+                        chunks = chunk(results, 3)
+                        // Get num of chunks
+                        var numOfChunks = chunks.length
+                        // Create a .then() chain
+                        var chain = $q.when();  
+                        for (let i=0; i<= numOfChunks; i++) {
+                            chain = chain.then(() => {
+                                // If there are no more chunks, close the browser instance
+                                if (i == numOfChunks) {
+                                    console.log("------Closing browser")
+                                    return cBrowser.close()
+                                } else {
+                                    console.log(`------Executing chunk ${i}`)
+                                    console.log(chunks[i])
+                                    return cronCrawl(chunks[i])
+                                }
+                            })
+                        }                
+                    })
             })
         // const msg = {
         //     to: 'solem8api@gmail.com',
@@ -171,9 +260,9 @@ scheduledCrawl = () => {
         //     // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
         //   };
         // sgMail.send(msg);
-        // cronCrawl(); 
         });
 };
+
 
 module.exports = crawl;
 

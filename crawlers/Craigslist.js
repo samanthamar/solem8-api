@@ -142,7 +142,7 @@ class Craigslist extends BaseCrawler {
     populatePhotoUrls(html, shoes) {
         let photoUrls = [];
         // Get all photo urls
-        console.log("------------PHOTOS")
+        // console.log("------------PHOTOS")
         let photoElements =  $('a.result-image.gallery > div.swipe', html)
         photoElements.each((i, photoElement) => {
             photoUrls.push(photoElement.children[0].children[0].children[0].attribs.src)
@@ -159,6 +159,7 @@ class Craigslist extends BaseCrawler {
         return shoes; 
     }
 
+    // TODO: Need to handle case where there are no results! 
     getNumResults(html) {
         // (rangeFrom - rangeTo)
         let rangeFrom = parseInt($('.rangeFrom',html).first().text()); 
