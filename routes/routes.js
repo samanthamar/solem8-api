@@ -19,13 +19,24 @@ router.get('/shoes', (req, res) => {
       model: req.query.model, // string
       size: req.query.size, // float 
       priceMin: req.query.priceMin, //float
-      priceMax: req.query.priceMax// float
+      priceMax: req.query.priceMax, // float
+      sortLowHigh: req.query.sortLowHigh // bool - true = sort low to high, else sort high to low
     } 
+
+    // Check the initial sort 
+    let initialSort = 'ASC';
+    if (searchParams.sortLowHigh == 'false') {
+      initialSort = 'DESC'; 
+    }
+
+    // query low to high 
+    // select * from shoes where model='yeezy'and size=10 and price between low/high order by price ASC;
 
     // Construct the query
     let query = `SELECT * from shoes where model='${searchParams.model}' 
                  and size='${searchParams.size}' 
-                 and price BETWEEN ${searchParams.priceMin} AND ${searchParams.priceMax}`
+                 and price BETWEEN ${searchParams.priceMin} AND ${searchParams.priceMax}
+                 ORDER BY ${initialSort}`; 
     // Execute the query 
     db.query(query, (err, result) => {
         if (err) {
@@ -34,13 +45,13 @@ router.get('/shoes', (req, res) => {
             error: err
           })
           // Send an email with the error
-          const msg = {
-            to: 'solem8api@gmail.com',
-            from: 'solem8api@gmail.com', 
-            subject: '[ERROR] /shoes endpoint',
-            text: `There was an issue retrieving data from the shoes table: ${err}`
-          };
-          sgMail.send(msg);
+          // const msg = {
+          //   to: 'solem8api@gmail.com',
+          //   from: 'solem8api@gmail.com', 
+          //   subject: '[ERROR] /shoes endpoint',
+          //   text: `There was an issue retrieving data from the shoes table: ${err}`
+          // };
+          // sgMail.send(msg);
           
         // If there are no results, the json response is {shoes: []} 
         } else if (result) {
