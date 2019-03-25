@@ -34,7 +34,7 @@ const getSearches = () => {
     }); 
 }; 
 
-
+// Original 
 const updateShoeTable = (searches, data) => {
     Promise.all(
         searches.map((search) => {
@@ -43,7 +43,7 @@ const updateShoeTable = (searches, data) => {
      .then(() => {
          console.log("---WIPED OLD DATA")
          // [[shoe,shoe,shoe],[]]
-         console.log(data.length)
+        //  console.log(data.length)
          data.forEach((array) => {
                array.forEach((subarray) => {
                    subarray.forEach((shoe) => {
@@ -102,16 +102,6 @@ const crawl = (model, size) => {
         // Limited to Toronto
         baseUrl = 'https://toronto.craigslist.org/search/sss?query='+searchParams+'&sort=rel'+'&searchNearby=1';
         console.log(baseUrl)
-        // console.log(baseShoe)
-        // This is the browser for this request
-        // let cBrowser; 
-        // puppeteer
-        //     .launch()
-        //     .then((browser) => {
-        //         console.log("-----------LAUNCHING PHANTOM BROWSER");
-        //         cBrowser = browser; 
-        //         return cBrowser.newPage();
-        //     })
         cBrowser
             .newPage()
             .then((page) => {
@@ -121,8 +111,6 @@ const crawl = (model, size) => {
                 cc.crawl()
                 // THE IMPORTANT DATA! 
                     .then((results) => {
-                        // console.log(results) 
-                        // cBrowser.close() 
                         resolve(results)
                 })
         })
@@ -135,43 +123,6 @@ const crawl = (model, size) => {
     })
 };
 
-// // Original
-// // Below is what the cron job will need to do!!!
-// const cronCrawl = () => {
-//     let searches; 
-//     getSearches()
-//         .then((results) => {
-//             searches = results; 
-//             // For each url, scrape the data
-//             return Promise.all(
-//             results.map((search) => {
-//                     return crawl(search.model, search.size)
-//             })).then((data)=> {
-//                 // Debugging
-//                 console.log("-----ALL PROMISES FULFILLED")
-//                 // console.log(data)
-//                 // console.log(searches)
-//                 updateShoeTable(searches, data)
-//                 // const msg = {
-//                 //     to: 'solem8api@gmail.com',
-//                 //     from: 'solem8api@gmail.com', 
-//                 //     subject: `Successfully completed crawl # ${cronCount}`,
-//                 //     text: `Cron crawl job #${cronCount} successfully completed.`
-//                 //   };
-//                 // sgMail.send(msg);
-
-//             }).then(() => {
-//                 console.log("-------CLOSING BROWSER")
-//                 cBrowser.close();
-//             })
-//         })
-//         .catch((err) => {
-//             // Handle error properly
-//             console.log(err)
-//         });
-// }
-
-
 // 3 chunks at a time 
 const cronCrawl = (queue) => {
     return Promise.all(
@@ -180,7 +131,11 @@ const cronCrawl = (queue) => {
         })).then((data)=> {
             // Debugging
             console.log("-----ALL PROMISES FULFILLED")
-            updateShoeTable(queue, data)
+            if (data[0] != null) {
+                updateShoeTable(queue, data)
+            } else{
+                console.log("---NO DATA TO INSERT")
+            }
         })
         .catch((err) => {
             console.log(err)
@@ -188,36 +143,10 @@ const cronCrawl = (queue) => {
 
 }; 
 
-// Original
-// const scheduledCrawl = () => {
-//     cron.schedule('*/5 * * * *', () => {
-//         cronCount++; 
-//         console.log(`------------------Initiating crawl # ${cronCount}`);
-//         puppeteer
-//             .launch()
-//             .then((browser) => {
-//             console.log("-----------CREATING BROWSER INSTANCE");
-//                 cBrowser = browser; 
-//             })
-//             .then(()=> {
-//                 cronCrawl(); 
-//             })
-//         // const msg = {
-//         //     to: 'solem8api@gmail.com',
-//         //     from: 'solem8api@gmail.com', 
-//         //     subject: `Initiating crawl ${cronCount}`,
-//         //     text: 'A crawl is being initiated'
-//         //     // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
-//         //   };
-//         // sgMail.send(msg);
-//         // cronCrawl(); 
-//         });
-// };
-
-
 // Task queue implementation
 scheduledCrawl = () => {
-    cron.schedule('*/2 * * * *', () => {
+    // Uncomment me with appropriate interval in production 
+    // cron.schedule('*/2 * * * *', () => {
         cronCount++; 
         console.log(`------------------Initiating crawl # ${cronCount}`);
         puppeteer
@@ -242,6 +171,7 @@ scheduledCrawl = () => {
                                 // If there are no more chunks, close the browser instance
                                 if (i == numOfChunks) {
                                     console.log("------Closing browser")
+                                    console.log("----CRAWL COMPLETE")
                                     return cBrowser.close()
                                 } else {
                                     console.log(`------Executing chunk ${i}`)
@@ -260,7 +190,7 @@ scheduledCrawl = () => {
         //     // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
         //   };
         // sgMail.send(msg);
-        });
+        // });
 };
 
 
