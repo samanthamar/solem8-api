@@ -21,7 +21,9 @@ Execute the following to create the appropriate local DB and table:
 
 `create database solem8;`
 
-`create table shoes (id int NOT NULL AUTO_INCREMENT, model varchar (50), size float,  url varchar(100), source varchar(50), title varchar(100), price float, PRIMARY KEY(id));`
+`create table shoes (id int NOT NULL AUTO_INCREMENT, model varchar (50), size float,  url varchar(100), source varchar(50), title varchar(100), price float, photo varchar (100), PRIMARY KEY(id));`
+
+`create table supportedShoes (id int NOT NULL AUTO_INCREMENT, model varchar (50), size float, PRIMARY KEY(id));`
 
 
 ---

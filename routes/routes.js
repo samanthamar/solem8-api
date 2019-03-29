@@ -1,9 +1,12 @@
 const router = require('express').Router();
 const rp = require('request-promise');
 const $ = require('cheerio');
-const db = require('./../db');
 const Craigslist = require('./../crawlers/Craigslist');
-const BaseShoe = require('./../models/BaseShoe')
+const BaseShoe = require('./../models/BaseShoe');
+const ShoeController = require('../controller/ShoeController');
+const puppeteer = require('puppeteer');
+const sgMail = require('@sendgrid/mail'); 
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // THIS FILE CONTAINS ALL THE ENDPOINT LOGIC 
 // base route to handle '/'
@@ -12,102 +15,85 @@ router.get('/', (req, res) => {
 });
 
 // Return all shoes from DB 
-// TODO: add filtering when getting shoes from DB
 router.get('/shoes', (req, res) => {
-    let q = "SELECT * FROM shoes"
-    db.query(q, (err, result) => {
-        if (err) throw err; 
-        console.log('Successfully retrieved records');
+    let searchParams = {
+        model: req.query.model, // string
+        size: req.query.size, // float 
+        priceMin: req.query.priceMin, //float
+        priceMax: req.query.priceMax// float
+    } 
+    
+    shoeController = new ShoeController();
+    shoeController.queryShoes(searchParams)
+    .then(returnedShoes => {
+        console.log("------SUCESSFULLY RETRIEVED RESULTS");
+        console.log(returnedShoes);
         res.send({
-            shoes: result
+          shoes: result 
         });
+    })
+    .catch(err => {
+        console.log(err)
+        res.send({
+          error: err
+        })
+        // Send an email with the error
+        const msg = {
+          to: 'solem8api@gmail.com',
+          from: 'solem8api@gmail.com', 
+          subject: '[ERROR] /shoes endpoint',
+          text: `There was an issue retrieving data from the shoes table: ${err}`
+        };
+        sgMail.send(msg);
     });
-
-    // let q2 = "show databases"
-    // db.query(q2, (err, result) => {
-    //     if (err) throw err; 
-    //     console.log('Successfully retrieved records');
-    //     res.send({
-    //         databases: result
-    //     });
-    // });
 });
 
-// Scrape Craigslist 
+// This endpoint isn't actually used, for testing purposes 
 router.get('/craigslist', (req, res) => {
-    let baseShoe = new BaseShoe(req.query.model.toLowerCase(),
-                                req.query.size.toLowerCase())
-    let searchParams = baseShoe.model+"+"+"size"+"+"+baseShoe.size // ie.Yeezy+desert+size+9
 
-    // TODO: 
-    // Define location somewhere
-    // let location = req.query.location.toLowerCase(); 
-    craigslistUrl = 'https://toronto.craigslist.org/search/sss?query='+searchParams+'&sort=rel'+'&searchNearby=1'
-    // request promise
-    rp(craigslistUrl)
-      // gets the html
-      .then((html) => {
-        // Get total num of results
-        let numTotalResults = parseInt($('.totalcount', html).first().text());
-        // Debugging
-        console.log("-------------Num of results:" + numTotalResults)
-        // Put me somewhere else
-        const urls =  (numOfResults, searchParams) => {
-          // Limited to Toronto
-          let baseUrl = 'https://toronto.craigslist.org/search/sss?query='
-          let pageUrls = []; 
-          // Craigslist lists a max of 120 posts/page
-          if (numOfResults < 120){
-              pageUrls.push(baseUrl+searchParams+'&sort=rel'+'&searchNearby=1')
-          } else {
-              let numPagesToCrawl = Math.floor(numOfResults/120);
-              console.log("Pages to crawl: " + numPagesToCrawl)
-              for (let i=0; i<=numPagesToCrawl; i++){
-              if (i==0) {
-                  pageUrls.push(baseUrl+searchParams+'&sort=rel'+'&searchNearby=1')
-              } else if (i==1){
-                  pageUrls.push(baseUrl+searchParams+'&s='+(i*120).toString()+'&sort=rel'+'&searchNearby=1')
-              }
-            }
-          }
-          return pageUrls;
-        }
-        // Get list of all urls to visit
-        let resultsUrls = urls(numTotalResults, searchParams)
+  // Create the baseurl
+  let baseShoe = new BaseShoe(req.query.model.toLowerCase(),
+                              req.query.size.toLowerCase())
+  let searchParams = baseShoe.model+"+"+"size"+"+"+baseShoe.size // ie.Yeezy+desert+size+9
+  // Limited to Toronto
+  craigslistUrl = 'https://toronto.craigslist.org/search/sss?query='+searchParams+'&sort=rel'+'&searchNearby=1'
 
-        let returnMap = {
-            urls: resultsUrls, 
-            shoeObject: baseShoe
-        };
-        return returnMap;  
-    }) 
-    .then((returnMap) => {
-        // From each result page, get the urls to each post
-        let promiseCount = 0; 
-        return Promise.all(
-          returnMap.urls.map((url) => {
-            let cl = new Craigslist(url); 
-            promiseCount++;
-            console.log("-----------------------------------Promise.all count: " + promiseCount);
-            console.log(url);
-            return cl.crawl(returnMap.shoeObject);
-          })
-        )
+  // This is the browser for this request
+  let cBrowser; 
+  puppeteer
+    .launch()
+    .then((browser) => {
+      console.log("-----------LAUNCHING PHANTOM BROWSER");
+      cBrowser = browser; 
     })
-    .then((results) => {
-        let cl = new Craigslist();
+    .then(() => {
+      return cBrowser.newPage();
+    })
+    .then((page) => {
+      // Create new Craigslist crawler object 
+      cl = new Craigslist(craigslistUrl, page, baseShoe); 
+      // Initiate the crawl
+      cl.crawl()
+        .then((results) => {
         var json = {
           status: 200, 
-          shoes: results
+          shoes: results 
         }
-        // Output JSON reponse 
-        res.send(json);
-        console.log('Successfully scraped')
-    })
-    .catch((error) => {
-      // handle this error
-      console.log(error)
-    })
-  });
+        console.log('Successfully scraped Craigslist crawl')
+        res.send(json)
+      })
+      .then(() => {
+        console.log("-------CLOSING BROWSER")
+        cBrowser.close()
+      })
+  })
+  .catch((err) => {
+    var json = {
+      status: 200, 
+      error: err 
+    }
+    res.send(json)
+  })
+});
 
 module.exports = router;
