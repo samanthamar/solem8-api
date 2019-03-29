@@ -1,6 +1,7 @@
 const $ = require('cheerio');
 const BaseCrawler = require('./BaseCrawler');
-const Shoe = require('./../models/Shoe');
+const ShoeController = require('../controller/ShoeController');
+// const puppeteer = require('puppeteer');
 
 class Craigslist extends BaseCrawler {
 
@@ -113,7 +114,8 @@ class Craigslist extends BaseCrawler {
                     let shoe = {
                         url: url, 
                         title: title,
-                        price: price,
+                        // price: price,
+                        price: parseFloat(price.replace('$','')),
                         hasPhoto: photoFlag,
                         photoUrl: null 
                     }
@@ -134,15 +136,23 @@ class Craigslist extends BaseCrawler {
             // Create new shoe object for each 
             let shoeObjects = [] 
             shoes.forEach((shoe) => {
-                shoeObjects.push(new Shoe(this.baseShoe.model, this.baseShoe.size, 
-                                          shoe.url, 'craigslist', 
-                                          shoe.title, shoe.price, 
-                                          shoe.photoUrl));
+                let shoe_detail = {
+                    model: this.baseShoe.model,
+                    size:  parseFloat(this.baseShoe.size), 
+                    url: shoe.url,
+                    source: 'craigslist',
+                    title: shoe.title,
+                    // price: parseFloat(shoe.price), 
+                    price: shoe.price, 
+                    photo: shoe.photoUrl
+                }
+                shoeObjects.push(shoe_detail);
             });
-            
+
+            const shoeController = new ShoeController();
             // Insert each shoeObj into DB 
             shoeObjects.forEach((shoe) => {
-                shoe.insert();
+                shoeController.insert(shoe);
             })
             return shoeObjects;
         })

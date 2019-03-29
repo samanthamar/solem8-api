@@ -51,7 +51,8 @@ class CronCrawler extends Craigslist {
                     let shoe = {
                         url: url, 
                         title: title,
-                        price: price,
+                        // price: price,
+                        price: parseFloat(price.replace('$','')),
                         hasPhoto: photoFlag,
                         photoUrl: null 
                     }
@@ -72,10 +73,16 @@ class CronCrawler extends Craigslist {
             // Create new shoe object for each 
             let shoeObjects = [] 
             shoes.forEach((shoe) => {
-                shoeObjects.push(new Shoe(this.baseShoe.model, this.baseShoe.size, 
-                                          shoe.url, 'craigslist', 
-                                          shoe.title, shoe.price, 
-                                          shoe.photoUrl));
+                shoeObjects.push({ 
+                    model: this.baseShoe.model, 
+                    size: parseFloat(this.baseShoe.size), 
+                    url: shoe.url,
+                    source: 'craigslist', 
+                    title: shoe.title,
+                    // price: parseFloat(shoe.price), 
+                    price: shoe.price, 
+                    photo: shoe.photoUrl
+                });
             });
 
             return shoeObjects;

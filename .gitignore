@@ -5,6 +5,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# ignore env files
+.env 
+.elasticbeanstalk/
+
 # Runtime data
 pids
 *.pid

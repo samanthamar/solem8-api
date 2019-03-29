@@ -1,8 +1,9 @@
 const router = require('express').Router();
 const rp = require('request-promise');
-const db = require('./../db');
+const $ = require('cheerio');
 const Craigslist = require('./../crawlers/Craigslist');
 const BaseShoe = require('./../models/BaseShoe');
+const ShoeController = require('../controller/ShoeController');
 const puppeteer = require('puppeteer');
 const sgMail = require('@sendgrid/mail'); 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -16,51 +17,34 @@ router.get('/', (req, res) => {
 // Return all shoes from DB 
 router.get('/shoes', (req, res) => {
     let searchParams = {
-      model: req.query.model, // string
-      size: req.query.size, // float 
-      priceMin: req.query.priceMin, //float
-      priceMax: req.query.priceMax, // float
-      sortLowHigh: req.query.sortLowHigh // bool - true = sort low to high, else sort high to low
+        model: req.query.model, // string
+        size: req.query.size, // float 
+        priceMin: req.query.priceMin, //float
+        priceMax: req.query.priceMax// float
     } 
-
-    // Check the initial sort 
-    let initialSort = 'ASC';
-    if (searchParams.sortLowHigh == 'false') {
-      initialSort = 'DESC'; 
-    }
-
-    // query low to high 
-    // select * from shoes where model='yeezy'and size=10 and price between low/high order by price ASC;
-
-    // Construct the query
-    let query = `SELECT * from shoes where model='${searchParams.model}' 
-                 and size='${searchParams.size}' 
-                 and price BETWEEN ${searchParams.priceMin} AND ${searchParams.priceMax}
-                 ORDER BY ${initialSort}`; 
-    // Execute the query 
-    db.query(query, (err, result) => {
-        if (err) {
-          console.log(err)
-          res.send({
-            error: err
-          })
-          // Send an email with the error
-          // const msg = {
-          //   to: 'solem8api@gmail.com',
-          //   from: 'solem8api@gmail.com', 
-          //   subject: '[ERROR] /shoes endpoint',
-          //   text: `There was an issue retrieving data from the shoes table: ${err}`
-          // };
-          // sgMail.send(msg);
-          
-        // If there are no results, the json response is {shoes: []} 
-        } else if (result) {
-          console.log("------SUCESSFULLY RETRIEVED RESULTS")
-          console.log(result)
-          res.send({
-            shoes: result 
-          })
-        }
+    
+    shoeController = new ShoeController();
+    shoeController.queryShoes(searchParams)
+    .then(returnedShoes => {
+        console.log("------SUCESSFULLY RETRIEVED RESULTS");
+        console.log(returnedShoes);
+        res.send({
+          shoes: result 
+        });
+    })
+    .catch(err => {
+        console.log(err)
+        res.send({
+          error: err
+        })
+        // Send an email with the error
+        const msg = {
+          to: 'solem8api@gmail.com',
+          from: 'solem8api@gmail.com', 
+          subject: '[ERROR] /shoes endpoint',
+          text: `There was an issue retrieving data from the shoes table: ${err}`
+        };
+        sgMail.send(msg);
     });
 });
 
