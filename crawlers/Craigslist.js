@@ -114,7 +114,6 @@ class Craigslist extends BaseCrawler {
                     let shoe = {
                         url: url, 
                         title: title,
-                        // price: price,
                         price: parseFloat(price.replace('$','')),
                         hasPhoto: photoFlag,
                         photoUrl: null 
@@ -142,7 +141,6 @@ class Craigslist extends BaseCrawler {
                     url: shoe.url,
                     source: 'craigslist',
                     title: shoe.title,
-                    // price: parseFloat(shoe.price), 
                     price: shoe.price, 
                     photo: shoe.photoUrl
                 }
