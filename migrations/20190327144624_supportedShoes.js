@@ -4,6 +4,7 @@ exports.up = function(knex, Promise) {
     knex.schema.createTable('supportedShoes', table => {
         table.increments('id').primary(),
         table.string('model'),
+        table.float('size'),
         table.timestamps(true, true)
     })
   ])

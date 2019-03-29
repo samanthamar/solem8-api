@@ -1,7 +1,8 @@
-const db = require('./../db');  
 const puppeteer = require('puppeteer');
 const cron = require('node-cron'); 
 const BaseShoe = require('./../models/BaseShoe');
+const ShoeController = require('./../controller/ShoeController');
+const SupportedShoes = require('./../models/SupportedShoes');
 const cronCrawler = require('./../crawlers/CronCrawler');
 require('./../models/Shoe');
 const sgMail = require('@sendgrid/mail'); 
@@ -10,18 +11,30 @@ cronCount = 0;
 
 getSearches = () => {
     return new Promise((resolve, reject) => {
-        let q = "select distinct model, size from supportedShoes"; 
-        // Select from table
-        db.query(q, (err, results) => {
-            // Need to handle errors properly
-            if (err) {
-                console.log("Error retrieving db data")
-                reject(err); 
-            } else if (results) {
-                console.log("Successfully retrieved db data");
-                resolve(results)
-            }
+        // Query
+        SupportedShoes.query()
+        .distinct('model', 'size')
+        .select()
+        .then(results => {
+            console.log("Successfully retrieved db data");
+            resolve(results);
+        })
+        .catch(err => {
+            console.log("Error retrieving db data");
+            reject(err); 
         });
+        // let q = "select distinct model, size from supportedShoes"; 
+        // // Select from table
+        // db.query(q, (err, results) => {
+        //     // Need to handle errors properly
+        //     if (err) {
+        //         console.log("Error retrieving db data")
+        //         reject(err); 
+        //     } else if (results) {
+        //         console.log("Successfully retrieved db data");
+        //         resolve(results)
+        //     }
+        // });
     }); 
 }; 
 
@@ -49,16 +62,16 @@ crawl = (model, size) => {
                 // Initiate the crawl
                 cc.crawl()
                 // THE IMPORTANT DATA! 
-                    .then((results) => {
-                        console.log(results) 
-                        console.log("-------CLOSING BROWSER")
-                        cBrowser.close() 
-                        resolve(results)
+                .then((results) => {
+                    console.log(results);
+                    console.log("-------CLOSING BROWSER");
+                    cBrowser.close(); 
+                    resolve(results);
                 })
-        })
+            })
         .catch((err) => {
             // Handle err properly
-            reject(err)
+            reject(err);
             console.log(err);
         })
 
@@ -69,44 +82,51 @@ updateShoeTable = (searches, data) => {
     Promise.all(
         searches.map((search) => {
             deleteEntries(search.model, search.size)
-     }))
-     .then(() => {
-         console.log("---WIPED OLD DATA")
-         // [[shoe,shoe,shoe],[]]
-         console.log(data.length)
-         data.forEach((array) => {
-               array.forEach((subarray) => {
-                   subarray.forEach((shoe) => {
-                       console.log(shoe)
-                       shoe.insert()
-                   })
-               })
-         })
-         console.log("---SUCCESSFULLY UPDATED DATA")
-     })
-     .catch((err) => {
-         // Handle err
-         console.log(err)
-     })
+        }))
+        .then(() => {
+            console.log("---WIPED OLD DATA")
+            // [[shoe,shoe,shoe],[]]
+            console.log(data.length)
+            data.forEach((array) => {
+                array.forEach((subarray) => {
+                    subarray.forEach((shoe) => {
+                        console.log(shoe);
+                        ShoeController.insert(shoe);
+                    })
+                })
+            })
+        console.log("---SUCCESSFULLY UPDATED DATA")
+    })
+    .catch((err) => {
+        // Handle err
+        console.log(err)
+    })
 
 }
 
 deleteEntries = (model, size) => {
     return new Promise((resolve, reject) => {
-        let q = "delete from shoes where " 
-        q += "model = " + `'${model}'` + " and size = " + parseFloat(size)
-        console.log(q)
-        db.query(q, (err, results) => {
-            // Need to handle errors properly
-            if (err) {
-                console.log("Error deleting from table")
-                reject(err); 
-            } else if (results) {
-                console.log("Successfully deleted rows");
-                resolve(1)
-            }
-        });
-    })
+        try {
+            ShoeController.delete(model, size);
+            resolve(1);
+        } catch(err) {
+            console.log("Error deleting from table");
+            reject(err); 
+        }
+        // let q = "delete from shoes where " 
+        // q += "model = " + `'${model}'` + " and size = " + parseFloat(size)
+        // console.log(q)
+        // db.query(q, (err, results) => {
+        //     // Need to handle errors properly
+        //     if (err) {
+        //         console.log("Error deleting from table");
+        //         reject(err); 
+        //     } else if (results) {
+        //         console.log("Successfully deleted rows");
+        //         resolve(1)
+        //     }
+        // });
+    });
 }
 
 // Sanity checks 
@@ -147,7 +167,7 @@ cronCrawl = () => {
 }
 
 scheduledCrawl = () => {
-    cron.schedule('*/5 * * * *', () => {
+    // cron.schedule('*/5 * * * *', () => {
         cronCount++; 
         console.log(`------------------Initiating crawl # ${cronCount}`);
         const msg = {
@@ -159,7 +179,7 @@ scheduledCrawl = () => {
           };
         sgMail.send(msg);
         cronCrawl(); 
-        });
+        // });
 };
 
 module.exports = crawl;

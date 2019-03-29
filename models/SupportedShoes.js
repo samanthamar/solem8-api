@@ -14,6 +14,7 @@ class SupportedShoes extends Model {
       properties: {
         id: {type: 'integer'},
         model: {type: 'string'},
+        size: {type: 'float'}
       }
     };
   }

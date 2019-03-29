@@ -15,7 +15,7 @@ router.get('/', (req, res) => {
 });
 
 // Return all shoes from DB 
-router.get('/shoes', async (req, res) => {
+router.get('/shoes', (req, res) => {
     let searchParams = {
         model: req.query.model, // string
         size: req.query.size, // float 
@@ -24,7 +24,7 @@ router.get('/shoes', async (req, res) => {
     } 
     
     shoeController = new ShoeController();
-    await shoeController.queryShoes(searchParams)
+    shoeController.queryShoes(searchParams)
     .then(returnedShoes => {
         console.log("------SUCESSFULLY RETRIEVED RESULTS");
         console.log(returnedShoes);
