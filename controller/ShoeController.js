@@ -6,7 +6,7 @@ class ShoeController {
 
     }
 
-    validate_input(shoeDetail) {
+    validateInput(shoeDetail) {
         for (var propName in shoeDetail) { 
             if (shoeDetail[propName] === null || shoeDetail[propName] === undefined) {
               delete shoeDetail[propName];
@@ -25,7 +25,7 @@ class ShoeController {
 
     async insert(shoeDetail) {
         try {
-            validate_input(shoeDetail)
+            this.validateInput(shoeDetail)
             await Shoe
                 .query()
                 .insert(shoeDetail)
