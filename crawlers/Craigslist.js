@@ -125,7 +125,7 @@ class Craigslist extends BaseCrawler {
                     url: shoe.url,
                     source: 'craigslist',
                     title: shoe.title,
-                    price: parseFloat(shoe.price), 
+                    price: 0, 
                     photo: shoe.photoUrl
                 }
                 shoeObjects.push(shoe_detail);

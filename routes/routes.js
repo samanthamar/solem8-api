@@ -29,7 +29,7 @@ router.get('/shoes', (req, res) => {
         console.log("------SUCESSFULLY RETRIEVED RESULTS");
         console.log(returnedShoes);
         res.send({
-          shoes: result 
+          shoes: returnedShoes 
         });
     })
     .catch(err => {

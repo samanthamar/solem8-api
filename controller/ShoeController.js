@@ -11,7 +11,7 @@ class ShoeController {
         .delete()
         .where('model', model)
         .andWhere('size', size);
-        console.log(numShoesDeleted + "entries is deleted");
+        console.log(numShoesDeleted + " entries is deleted");
     }
 
     async insert(shoeDetail) {
@@ -39,7 +39,7 @@ class ShoeController {
                 .andWhere('size', searchParams.size)
                 .andWhere('price', '>=', searchParams.priceMin)
                 .andWhere('price', '<=', searchParams.priceMax);
-            console.log(shoes.length + "Shoes found in the database");
+            console.log(shoes.length + " Shoes found in the database");
             return shoes;
         } catch(err) {
             console.log(err);
