@@ -6,12 +6,14 @@ dotenv.config({ path: './config/.env' });
 const settings = {
   development: {
     server: {
-      port: 3000
+      port: 3000,
+      sendgrid_key: process.env.SENDGRID_API_KEY
     }
   }, 
   production: {
     server: {
-      port: 3000
+      port: 3000,
+      sendgrid_key: process.env.SENDGRID_API_KEY
     }
   }
 }

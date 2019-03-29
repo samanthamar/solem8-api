@@ -5,9 +5,15 @@ const ShoeController = require('./../controller/ShoeController');
 const SupportedShoes = require('./../models/SupportedShoes');
 const cronCrawler = require('./../crawlers/CronCrawler');
 require('./../models/Shoe');
+
+// Load env variables for sendgrid
+const environment = process.env.NODE_ENV || 'development';
+const { sendgrid_key } = require('./../config/config')[environment].server;
 const sgMail = require('@sendgrid/mail'); 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+sgMail.setApiKey(sendgrid_key);
 cronCount = 0; 
+
+const shoeController = new ShoeController();
 
 getSearches = () => {
     return new Promise((resolve, reject) => {
@@ -91,7 +97,7 @@ updateShoeTable = (searches, data) => {
                 array.forEach((subarray) => {
                     subarray.forEach((shoe) => {
                         console.log(shoe);
-                        ShoeController.insert(shoe);
+                        shoeController.insert(shoe);
                     })
                 })
             })
@@ -107,7 +113,7 @@ updateShoeTable = (searches, data) => {
 deleteEntries = (model, size) => {
     return new Promise((resolve, reject) => {
         try {
-            ShoeController.delete(model, size);
+            shoeController.delete(model, size);
             resolve(1);
         } catch(err) {
             console.log("Error deleting from table");
