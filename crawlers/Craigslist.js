@@ -1,4 +1,3 @@
-// const rp = require('request-promise');
 const $ = require('cheerio');
 const BaseCrawler = require('./BaseCrawler');
 const ShoeController = require('../controller/ShoeController');
@@ -18,40 +17,57 @@ class Craigslist extends BaseCrawler {
             return this.page.content(); 
         })
         .then((html) => {
-            // Get total num of results
-            let numTotalResults = parseInt($('.totalcount', html).first().text());
-            // Put me somewhere else
-            const urls = (numOfResults) => {
-                let pageUrls = []; 
-                let searchParams = this.baseShoe.model+"+"+"size"+"+"+this.baseShoe.size // ie.Yeezy+desert+size+9
-                // Limited to Toronto
-                let baseSearchUrl = 'https://toronto.craigslist.org/search/sss?query='
-                // Craigslist lists a max of 120 posts/page
-                if (numOfResults < 120){
-                    pageUrls.push(baseSearchUrl+searchParams+'&sort=rel'+'&searchNearby=1')
-                } else {
-                    let numPagesToCrawl = Math.floor(numOfResults/120);
-                    console.log("Pages to crawl: " + numPagesToCrawl)
-                    for (let i=0; i<=numPagesToCrawl; i++){
-                    if (i==0) {
+            // First verify there are results 
+            let displayCountShow = $('span.displaycountShow', html) 
+            console.log(displayCountShow.text())
+            if (displayCountShow.text() == '00') {
+                // Return nothing if there are no results
+                // this.crawlUrls is thus empty
+                console.log("---There are no results")
+                return null 
+            } else {
+                // Get total num of results
+                let numTotalResults = parseInt($('.totalcount', html).first().text());
+                console.log("--------NUM TOTAL RESULTS");
+                console.log(numTotalResults);
+                // Put me somewhere else
+                const urls = (numOfResults) => {
+                    let pageUrls = []; 
+                    let searchParams = this.baseShoe.model+"+"+"size"+"+"+this.baseShoe.size // ie.Yeezy+desert+size+9
+                    // Limited to Toronto
+                    let baseSearchUrl = 'https://toronto.craigslist.org/search/sss?query='
+                    // Craigslist lists a max of 120 posts/page
+                    if (numOfResults < 120){
                         pageUrls.push(baseSearchUrl+searchParams+'&sort=rel'+'&searchNearby=1')
-                    } else if (i==1){
-                        pageUrls.push(baseSearchUrl+searchParams+'&s='+(i*120).toString()+'&sort=rel'+'&searchNearby=1')
+                    } else {
+                        let numPagesToCrawl = Math.floor(numOfResults/120);
+                        console.log("Pages to crawl: " + numPagesToCrawl)
+                        for (let i=0; i<=numPagesToCrawl; i++){
+                        if (i==0) {
+                            pageUrls.push(baseSearchUrl+searchParams+'&sort=rel'+'&searchNearby=1')
+                        } else if (i==1){
+                            pageUrls.push(baseSearchUrl+searchParams+'&s='+(i*120).toString()+'&sort=rel'+'&searchNearby=1')
+                        }
+                        }
                     }
-                    }
+                    return pageUrls;
                 }
-                return pageUrls;
+                // Populate list of all urls to visit
+                this.crawlUrls = urls(numTotalResults)
             }
-            // Populate list of all urls to visit
-            this.crawlUrls = urls(numTotalResults)
         })
         .then(() => {
-        // For each url, scrape the data
-        return Promise.all(
-          this.crawlUrls.map((url) => {
-            return this.scrapeData(url);
-          })
-        )   
+            // Check if there are any urls to crawl 
+            if (this.crawlUrls.length == 0) {
+                console.log("----There are no urls to crawl")
+                return null
+            } else {
+                // For each url, scrape the data
+                return Promise.all(
+                    this.crawlUrls.map((url) => {
+                        return this.scrapeData(url);
+                    }))   
+            }
         })
         .catch((err) => {
             // Handle error properly
@@ -98,7 +114,7 @@ class Craigslist extends BaseCrawler {
                     let shoe = {
                         url: url, 
                         title: title,
-                        price: price,
+                        price: parseFloat(price.replace('$','')),
                         hasPhoto: photoFlag,
                         photoUrl: null 
                     }
@@ -125,7 +141,7 @@ class Craigslist extends BaseCrawler {
                     url: shoe.url,
                     source: 'craigslist',
                     title: shoe.title,
-                    price: 0, 
+                    price: shoe.price, 
                     photo: shoe.photoUrl
                 }
                 shoeObjects.push(shoe_detail);
@@ -147,7 +163,7 @@ class Craigslist extends BaseCrawler {
     populatePhotoUrls(html, shoes) {
         let photoUrls = [];
         // Get all photo urls
-        console.log("------------PHOTOS")
+        // console.log("------------PHOTOS")
         let photoElements =  $('a.result-image.gallery > div.swipe', html)
         photoElements.each((i, photoElement) => {
             photoUrls.push(photoElement.children[0].children[0].children[0].attribs.src)
@@ -171,11 +187,13 @@ class Craigslist extends BaseCrawler {
         let numResults =0; 
         // Hacky 
         if (rangeFrom == 1) {
-        numResults = rangeTo; 
+            numResults = rangeTo; 
         } else {
-        numResults = rangeTo - rangeFrom; 
+            numResults = rangeTo - rangeFrom; 
         }
+
         return numResults; 
+
     }
 
   }

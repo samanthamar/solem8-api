@@ -51,7 +51,8 @@ class CronCrawler extends Craigslist {
                     let shoe = {
                         url: url, 
                         title: title,
-                        price: price,
+                        // price: price,
+                        price: parseFloat(price.replace('$','')),
                         hasPhoto: photoFlag,
                         photoUrl: null 
                     }
@@ -78,7 +79,8 @@ class CronCrawler extends Craigslist {
                     url: shoe.url,
                     source: 'craigslist', 
                     title: shoe.title,
-                    price: 0, 
+                    // price: parseFloat(shoe.price), 
+                    price: shoe.price, 
                     photo: shoe.photoUrl
                 });
             });

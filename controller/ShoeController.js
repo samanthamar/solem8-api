@@ -5,6 +5,15 @@ class ShoeController {
     constructor() {
 
     }
+
+    validate_input(shoeDetail) {
+        for (var propName in shoeDetail) { 
+            if (shoeDetail[propName] === null || shoeDetail[propName] === undefined) {
+              delete shoeDetail[propName];
+            }
+        }
+    }
+
     async delete(model, size) {
         const numShoesDeleted = await Shoe
         .query()
@@ -16,6 +25,7 @@ class ShoeController {
 
     async insert(shoeDetail) {
         try {
+            validate_input(shoeDetail)
             await Shoe
                 .query()
                 .insert(shoeDetail)
