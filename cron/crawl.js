@@ -19,7 +19,7 @@ let cBrowser;
 
 const shoeController = new ShoeController();
 
-getSearches = () => {
+const getSearches = () => {
     return new Promise((resolve, reject) => {
         // Query
         SupportedShoes.query()
@@ -88,7 +88,7 @@ getSearches = () => {
 //     })
 // };
 
-updateShoeTable = (searches, data) => {
+const updateShoeTable = (searches, data) => {
     Promise.all(
         searches.map((search) => {
             deleteEntries(search.model, search.size)

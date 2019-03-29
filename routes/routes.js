@@ -8,6 +8,8 @@ const puppeteer = require('puppeteer');
 const sgMail = require('@sendgrid/mail'); 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
+const shoeController = new ShoeController(); 
+
 // THIS FILE CONTAINS ALL THE ENDPOINT LOGIC 
 // base route to handle '/'
 router.get('/', (req, res) => {
@@ -20,22 +22,23 @@ router.get('/shoes', (req, res) => {
         model: req.query.model, // string
         size: req.query.size, // float 
         priceMin: req.query.priceMin, //float
-        priceMax: req.query.priceMax// float
+        priceMax: req.query.priceMax,// float
+        sortLowHigh: req.query.sortLowHigh
     } 
     
-    shoeController = new ShoeController();
-    shoeController.queryShoes(searchParams)
-    .then(returnedShoes => {
+    shoeController
+      .queryShoes(searchParams)
+      .then(returnedShoes => {
         console.log("------SUCESSFULLY RETRIEVED RESULTS");
         console.log(returnedShoes);
         res.send({
-          shoes: result 
+          shoes: returnedShoes 
         });
-    })
-    .catch(err => {
-        console.log(err)
-        res.send({
-          error: err
+      })
+      .catch(err => {
+          console.log(err)
+          res.send({
+            error: err
         })
         // Send an email with the error
         const msg = {
@@ -46,6 +49,32 @@ router.get('/shoes', (req, res) => {
         };
         sgMail.send(msg);
     });
+});
+
+router.get('/supportedShoes', (req, res) => {
+  shoeController
+    .getSupportedShoes()
+    .then(returnedShoes => {
+      console.log("------SUCESSFULLY RETRIEVED RESULTS");
+      console.log(returnedShoes);
+      res.send({
+        shoes: returnedShoes 
+      });
+    })
+    .catch(err => {
+      console.log(err)
+      res.send({
+        error: err
+      })
+      // Send an email with the error
+      const msg = {
+        to: 'solem8api@gmail.com',
+        from: 'solem8api@gmail.com', 
+        subject: '[ERROR] /supportedShoes endpoint',
+        text: `There was an issue retrieving data from the shoes table: ${err}`
+      };
+      sgMail.send(msg);
+  });
 });
 
 // This endpoint isn't actually used, for testing purposes 

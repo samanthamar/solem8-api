@@ -6,5 +6,6 @@ const router = require('./routes/routes');
 app.use('/', router);
 app.use('/craigslist', router); 
 app.use('/shoes', router); 
+app.use('/supportedShoes', router); 
 
 module.exports = app;
