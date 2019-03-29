@@ -1,5 +1,8 @@
-// All crawlers must inherit from this class and 
-// implement the methods below
+/*
+    All future crawlers inherit from this class
+    All future crawler must override the described 
+    functions 
+*/
 class BaseCrawler {
 
     constructor(url) {

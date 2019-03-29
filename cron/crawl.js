@@ -1,8 +1,6 @@
 const puppeteer = require('puppeteer');
 const cron = require('node-cron'); 
 const $q = require('q'); 
-
-// const db = require('./../db');  
 const BaseShoe = require('./../models/BaseShoe');
 const ShoeController = require('./../controller/ShoeController');
 const SupportedShoes = require('./../models/SupportedShoes');
@@ -14,25 +12,31 @@ const environment = process.env.NODE_ENV || 'development';
 const { sendgrid_key } = require('./../config/config')[environment].server;
 const sgMail = require('@sendgrid/mail'); 
 sgMail.setApiKey(sendgrid_key);
+
+// Global variables
 cronCount = 0; 
 let cBrowser; 
-
 const shoeController = new ShoeController();
 
+/*
+  Retrieve the list of shoes to crawl
+  from the supportedShoes table. 
+*/
 const getSearches = () => {
     return new Promise((resolve, reject) => {
         // Query
-        SupportedShoes.query()
-        .distinct('model', 'size')
-        .select()
-        .then(results => {
-            console.log("Successfully retrieved db data");
-            resolve(results);
-        })
-        .catch(err => {
-            console.log("Error retrieving db data");
-            reject(err); 
-        });
+        SupportedShoes
+            .query()
+            .distinct('model', 'size')
+            .select()
+            .then(results => {
+                console.log("Successfully retrieved db data");
+                resolve(results);
+            })
+            .catch(err => {
+                console.log("Error retrieving db data");
+                reject(err); 
+            });
         // let q = "select distinct model, size from supportedShoes"; 
         // // Select from table
         // db.query(q, (err, results) => {
@@ -48,46 +52,10 @@ const getSearches = () => {
     }); 
 }; 
 
-// // Mostly copy and paste
-// crawl = (model, size) => {
-//     return new Promise((resolve, reject) => {
-//         // Create the baseurl
-//         let baseShoe = new BaseShoe(model.toLowerCase(), size);
-//         let searchParams = baseShoe.model+"+"+"size"+"+"+baseShoe.size; // ie.Yeezy+desert+size+9
-//         // Limited to Toronto
-//         baseUrl = 'https://toronto.craigslist.org/search/sss?query='+searchParams+'&sort=rel'+'&searchNearby=1';
-//         console.log(baseShoe)
-//         // This is the browser for this request
-//         let cBrowser; 
-//         puppeteer
-//             .launch()
-//             .then((browser) => {
-//                 console.log("-----------LAUNCHING PHANTOM BROWSER");
-//                 cBrowser = browser; 
-//                 return cBrowser.newPage();
-//             })
-//             .then((page) => {
-//                 // Create new Craigslist crawler object 
-//                 cc = new cronCrawler(baseUrl, page, baseShoe); 
-//                 // Initiate the crawl
-//                 cc.crawl()
-//                 // THE IMPORTANT DATA! 
-//                 .then((results) => {
-//                     console.log(results);
-//                     console.log("-------CLOSING BROWSER");
-//                     cBrowser.close(); 
-//                     resolve(results);
-//                 })
-//             })
-//         .catch((err) => {
-//             // Handle err properly
-//             reject(err);
-//             console.log(err);
-//         })
-
-//     })
-// };
-
+/*
+  Delete old shoe data and update table 
+  with freshly crawled data
+*/
 const updateShoeTable = (searches, data) => {
     Promise.all(
         searches.map((search) => {
@@ -114,6 +82,9 @@ const updateShoeTable = (searches, data) => {
 
 }
 
+/*
+  Delete old entries from table
+*/
 const deleteEntries = (model, size) => {
     return new Promise((resolve, reject) => {
         try {
@@ -139,7 +110,10 @@ const deleteEntries = (model, size) => {
     });
 }
 
-// Split crawls into chunks 
+/*
+    A helper function to split the supportedShoes
+    list into subarrays of 3 (these are called chunks)
+*/
 const chunk = (arr, len) => {
 
     var chunks = [],
@@ -153,7 +127,9 @@ const chunk = (arr, len) => {
     return chunks;
   }
 
-// This crawl function calls the crawler
+/*
+  This function performs a crawl on each model, size pair
+*/
 const crawl = (model, size) => {
     return new Promise((resolve, reject) => {
         // Create the baseurl
@@ -183,7 +159,10 @@ const crawl = (model, size) => {
     })
 };
 
-// 3 chunks at a time 
+/*
+  This is the function the cron crawl function will call
+  It crawls 1 chunk at a time 
+*/
 const cronCrawl = (queue) => {
     return Promise.all(
         queue.map((search) => {
@@ -203,7 +182,10 @@ const cronCrawl = (queue) => {
 
 }; 
 
-// Task queue implementation
+/*
+  This is the ACTUAL function that will be called to initate 
+  scheduled crawls 
+*/
 scheduledCrawl = () => {
     // Uncomment me with appropriate interval in production 
     // cron.schedule('*/2 * * * *', () => {
@@ -247,7 +229,6 @@ scheduledCrawl = () => {
             from: 'solem8api@gmail.com', 
             subject: `Initiating crawl ${cronCount}`,
             text: 'A crawl is being initiated'
-            // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
           };
         sgMail.send(msg);
         // });

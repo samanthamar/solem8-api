@@ -2,6 +2,10 @@
 const Shoe = require('../models/Shoe');
 const SupportedShoes = require('../models/SupportedShoes');
 
+/*
+  The Shoe Controller is responsible 
+  for all DB operations on Shoe objects
+*/
 class ShoeController {
     constructor() {
 

@@ -1,22 +1,25 @@
 const router = require('express').Router();
-const rp = require('request-promise');
-const $ = require('cheerio');
 const Craigslist = require('./../crawlers/Craigslist');
 const BaseShoe = require('./../models/BaseShoe');
 const ShoeController = require('../controller/ShoeController');
 const puppeteer = require('puppeteer');
 const sgMail = require('@sendgrid/mail'); 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
 const shoeController = new ShoeController(); 
 
-// THIS FILE CONTAINS ALL THE ENDPOINT LOGIC 
-// base route to handle '/'
+/*
+  This is the base endpoint to check if
+  the server is responding 
+*/
 router.get('/', (req, res) => {
   res.status(200).json({ message: 'Your backend is working!' });
 });
 
-// Return all shoes from DB 
+/*
+  This endpoint retrieves shoes from the DB and 
+  sort its in asending or descending order. A 
+  json response is returned with the shoe data. 
+*/
 router.get('/shoes', (req, res) => {
     let searchParams = {
         model: req.query.model, // string
@@ -51,6 +54,10 @@ router.get('/shoes', (req, res) => {
     });
 });
 
+/*
+  This endpoint retrieves all the supported shoes. The
+  json response is returned. 
+*/
 router.get('/supportedShoes', (req, res) => {
   shoeController
     .getSupportedShoes()
@@ -77,7 +84,9 @@ router.get('/supportedShoes', (req, res) => {
   });
 });
 
-// This endpoint isn't actually used, for testing purposes 
+/*
+  This endpoint is just for testing the crawler.
+*/
 router.get('/craigslist', (req, res) => {
 
   // Create the baseurl

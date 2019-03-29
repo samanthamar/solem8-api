@@ -10,4 +10,4 @@ app.listen(port, () => {
 });
 
 
-// scheduledCrawl();
+scheduledCrawl();
