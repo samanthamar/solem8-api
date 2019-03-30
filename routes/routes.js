@@ -3,9 +3,13 @@ const Craigslist = require('./../crawlers/Craigslist');
 const BaseShoe = require('./../models/BaseShoe');
 const ShoeController = require('../controller/ShoeController');
 const puppeteer = require('puppeteer');
+
+// Load env variables for sendgrid
+const environment = process.env.NODE_ENV || 'development';
+const { sendgrid_key } = require('./../config/config')[environment].server;
 const sgMail = require('@sendgrid/mail'); 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const shoeController = new ShoeController(); 
+sgMail.setApiKey(sendgrid_key);
 
 /*
   This is the base endpoint to check if

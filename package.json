@@ -22,6 +22,7 @@
     "node-cron": "^2.0.3",
     "npm": "^6.9.0",
     "objection": "^1.6.6",
+    "puppeteer": "^1.14.0",
     "q": "^1.5.1",
     "request": "^2.88.0",
     "request-promise": "^4.2.2"
