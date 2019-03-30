@@ -1,8 +1,10 @@
 const $ = require('cheerio');
 const BaseCrawler = require('./BaseCrawler');
 const ShoeController = require('../controller/ShoeController');
-// const puppeteer = require('puppeteer');
 
+/*
+  Craigslist crawls Craigslist for shoe data
+*/
 class Craigslist extends BaseCrawler {
 
     constructor(url, page, baseShoe) {
@@ -12,6 +14,10 @@ class Craigslist extends BaseCrawler {
         this.baseShoe = baseShoe // baseShoe object
     }
     
+    /*
+        Overriden from the base class. Implements
+        the crawl function.
+    */
     crawl() {
         return this.page.goto(this.url).then(() => {
             return this.page.content(); 
@@ -75,6 +81,9 @@ class Craigslist extends BaseCrawler {
         })
     };
 
+    /*
+        For each search result page, scrape the data
+    */
     scrapeData(url) {
         return this.page.goto(url).then(() => {
             return this.page.content(); 
@@ -160,6 +169,11 @@ class Craigslist extends BaseCrawler {
         })
     };
 
+    /*
+        It is not possible to go to a speciic post to get photo info
+        Here, we just get all the photos on the page and from the parent
+        function call, we map each photo to a post
+    */
     populatePhotoUrls(html, shoes) {
         let photoUrls = [];
         // Get all photo urls
@@ -180,6 +194,9 @@ class Craigslist extends BaseCrawler {
         return shoes; 
     }
 
+    /*
+        Get the number of results on a search page
+    */
     getNumResults(html) {
         // (rangeFrom - rangeTo)
         let rangeFrom = parseInt($('.rangeFrom',html).first().text()); 

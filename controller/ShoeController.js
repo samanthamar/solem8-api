@@ -1,6 +1,11 @@
 'use strict';
 const Shoe = require('../models/Shoe');
+const SupportedShoes = require('../models/SupportedShoes');
 
+/*
+  The Shoe Controller is responsible 
+  for all DB operations on Shoe objects
+*/
 class ShoeController {
     constructor() {
 
@@ -37,6 +42,7 @@ class ShoeController {
     async getAllShoes() {
         try {
             const allShoes = await Shoe.query()
+            return allShoes
         } catch(err) {
             console.log(err);
         }
@@ -44,13 +50,35 @@ class ShoeController {
 
     async queryShoes(searchParams) {
         try {
-            const shoes = await Shoe.query()
-                .where('model', searchParams.model)
-                .andWhere('size', searchParams.size)
-                .andWhere('price', '>=', searchParams.priceMin)
-                .andWhere('price', '<=', searchParams.priceMax);
-            console.log(shoes.length + " Shoes found in the database");
+            // Don't know how the frontend will send this param
+            let shoes; 
+            if (searchParams.sortLowHigh == 'true') {
+                shoes = await Shoe.query()
+                    .where('model', searchParams.model)
+                    .andWhere('size', searchParams.size)
+                    .andWhere('price', '>=', searchParams.priceMin)
+                    .andWhere('price', '<=', searchParams.priceMax)
+                    .orderBy('price', 'asc')   
+            } else {
+                shoes = await Shoe.query()
+                    .where('model', searchParams.model)
+                    .andWhere('size', searchParams.size)
+                    .andWhere('price', '>=', searchParams.priceMin)
+                    .andWhere('price', '<=', searchParams.priceMax)
+                    .orderBy('price', 'desc')   
+            }
+            console.log(shoes.length + "Shoes found in the database");
             return shoes;
+        } catch(err) {
+            console.log(err);
+        }
+    }
+
+    async getSupportedShoes() {
+        try {
+            const data = await SupportedShoes.query();
+            console.log(data)
+            return data
         } catch(err) {
             console.log(err);
         }

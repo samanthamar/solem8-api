@@ -1,6 +1,4 @@
 const router = require('express').Router();
-const rp = require('request-promise');
-const $ = require('cheerio');
 const Craigslist = require('./../crawlers/Craigslist');
 const BaseShoe = require('./../models/BaseShoe');
 const ShoeController = require('../controller/ShoeController');
@@ -10,36 +8,44 @@ const puppeteer = require('puppeteer');
 const environment = process.env.NODE_ENV || 'development';
 const { sendgrid_key } = require('./../config/config')[environment].server;
 const sgMail = require('@sendgrid/mail'); 
+const shoeController = new ShoeController(); 
 sgMail.setApiKey(sendgrid_key);
 
-// THIS FILE CONTAINS ALL THE ENDPOINT LOGIC 
-// base route to handle '/'
+/*
+  This is the base endpoint to check if
+  the server is responding 
+*/
 router.get('/', (req, res) => {
   res.status(200).json({ message: 'Your backend is working!' });
 });
 
-// Return all shoes from DB 
+/*
+  This endpoint retrieves shoes from the DB and 
+  sort its in asending or descending order. A 
+  json response is returned with the shoe data. 
+*/
 router.get('/shoes', (req, res) => {
     let searchParams = {
         model: req.query.model, // string
         size: req.query.size, // float 
         priceMin: req.query.priceMin, //float
-        priceMax: req.query.priceMax// float
+        priceMax: req.query.priceMax,// float
+        sortLowHigh: req.query.sortLowHigh
     } 
     
-    shoeController = new ShoeController();
-    shoeController.queryShoes(searchParams)
-    .then(returnedShoes => {
+    shoeController
+      .queryShoes(searchParams)
+      .then(returnedShoes => {
         console.log("------SUCESSFULLY RETRIEVED RESULTS");
         console.log(returnedShoes);
         res.send({
           shoes: returnedShoes 
         });
-    })
-    .catch(err => {
-        console.log(err)
-        res.send({
-          error: err
+      })
+      .catch(err => {
+          console.log(err)
+          res.send({
+            error: err
         })
         // Send an email with the error
         const msg = {
@@ -52,7 +58,39 @@ router.get('/shoes', (req, res) => {
     });
 });
 
-// This endpoint isn't actually used, for testing purposes 
+/*
+  This endpoint retrieves all the supported shoes. The
+  json response is returned. 
+*/
+router.get('/supportedShoes', (req, res) => {
+  shoeController
+    .getSupportedShoes()
+    .then(returnedShoes => {
+      console.log("------SUCESSFULLY RETRIEVED RESULTS");
+      console.log(returnedShoes);
+      res.send({
+        shoes: returnedShoes 
+      });
+    })
+    .catch(err => {
+      console.log(err)
+      res.send({
+        error: err
+      })
+      // Send an email with the error
+      const msg = {
+        to: 'solem8api@gmail.com',
+        from: 'solem8api@gmail.com', 
+        subject: '[ERROR] /supportedShoes endpoint',
+        text: `There was an issue retrieving data from the shoes table: ${err}`
+      };
+      sgMail.send(msg);
+  });
+});
+
+/*
+  This endpoint is just for testing the crawler.
+*/
 router.get('/craigslist', (req, res) => {
 
   // Create the baseurl
