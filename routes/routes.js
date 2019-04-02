@@ -2,6 +2,7 @@ const router = require('express').Router();
 const Craigslist = require('./../crawlers/Craigslist');
 const BaseShoe = require('./../models/BaseShoe');
 const ShoeController = require('../controller/ShoeController');
+const WatchlistController = require('../controller/WatchlistController');
 const puppeteer = require('puppeteer');
 
 // Load env variables for sendgrid
@@ -9,6 +10,7 @@ const environment = process.env.NODE_ENV || 'development';
 const { sendgrid_key } = require('./../config/config')[environment].server;
 const sgMail = require('@sendgrid/mail'); 
 const shoeController = new ShoeController(); 
+const watchlistController = new WatchlistController(); 
 sgMail.setApiKey(sendgrid_key);
 
 /*
@@ -18,6 +20,35 @@ sgMail.setApiKey(sendgrid_key);
 router.get('/', (req, res) => {
   res.status(200).json({ message: 'Your backend is working!' });
 });
+
+router.get('/watchlist', (req, res) => { 
+  let username = req.query.username; 
+  watchlistController 
+    .getWatchlist(username)
+    .then((watchlist) => {
+      console.log("------SUCESSFULLY RETRIEVED WATCHLIST");
+      console.log(watchlist);
+      res.send({
+        watchlist: watchlist 
+      });
+    })      
+    .catch(err => {
+      console.log(err)
+      res.send({
+        error: err
+    })
+    // Send an email with the error
+    const msg = {
+      to: 'solem8api@gmail.com',
+      from: 'solem8api@gmail.com', 
+      subject: '[ERROR] /watchlist endpoint',
+      text: `There was an issue retrieving watchlist for user ${username}: ${err}`
+    };
+    sgMail.send(msg);
+});
+
+
+}); 
 
 /*
   This endpoint retrieves shoes from the DB and 

@@ -25,6 +25,8 @@ Execute the following to create the appropriate local DB and table:
 
 `create table supportedShoes (id int NOT NULL AUTO_INCREMENT, model varchar (50), size float, PRIMARY KEY(id));`
 
+`create table watchlist (id int NOT NULL AUTO_INCREMENT, username varchar (50), model varchar (50), size float, priceMin float, priceMax float, PRIMARY KEY(id));`
+
 
 ---
 
