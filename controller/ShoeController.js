@@ -54,7 +54,7 @@ class ShoeController {
         try {
             // Don't know how the frontend will send this param
             let shoes; 
-            if (searchParams.sortLowHigh == 'true') {
+            if (searchParams.sortLowHigh == 'True') {
                 shoes = await Shoe.query()
                     .where('model', searchParams.model)
                     .andWhere('size', searchParams.size)
