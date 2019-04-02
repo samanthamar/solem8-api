@@ -13,6 +13,11 @@ Return shoes from DB: `localhost:3000/shoes/`
 
 **Usage:** 
 /craigslist: `?model=<model>&size=<size>`
+/shoes: `?model=yeezy&size=10&priceMin=0&priceMax=1000&sortLowHigh=true`
+/supportedShoes 
+/watchlist 
+/watchlist/add 
+/watchlist/delete
 
 **LocalDB:**
 Execute the following to create the appropriate local DB and table:

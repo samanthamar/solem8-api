@@ -23,10 +23,10 @@ class ShoeController {
 
     async delete(model, size) {
         const numShoesDeleted = await Shoe
-        .query()
-        .delete()
-        .where('model', model)
-        .andWhere('size', size);
+            .query()
+            .delete()
+            .where('model', model)
+            .andWhere('size', size);
         console.log(numShoesDeleted + " entries is deleted");
     }
 

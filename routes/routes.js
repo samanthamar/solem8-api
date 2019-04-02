@@ -1,9 +1,9 @@
 const router = require('express').Router();
+const puppeteer = require('puppeteer');
 const Craigslist = require('./../crawlers/Craigslist');
 const BaseShoe = require('./../models/BaseShoe');
 const ShoeController = require('../controller/ShoeController');
 const WatchlistController = require('../controller/WatchlistController');
-const puppeteer = require('puppeteer');
 
 // Load env variables for sendgrid
 const environment = process.env.NODE_ENV || 'development';
@@ -21,6 +21,9 @@ router.get('/', (req, res) => {
   res.status(200).json({ message: 'Your backend is working!' });
 });
 
+/*
+  This is endpoint retrieves a user's watchlist
+*/
 router.get('/watchlist', (req, res) => { 
   let username = req.query.username; 
   watchlistController 
@@ -45,9 +48,141 @@ router.get('/watchlist', (req, res) => {
       text: `There was an issue retrieving watchlist for user ${username}: ${err}`
     };
     sgMail.send(msg);
-});
+  });
 
+}); 
 
+/*
+  This endpoint validates if a watchlist item can be added
+  If it can, add it 
+  If it can't, an error is returned
+*/
+router.post('/watchlist/add', (req, res) => { 
+    console.log(req.body); // {foo:'bar',n:40}
+    // Parse the JSON
+    let watchlistItem = {
+      username: req.body.username, 
+      model: req.body.model, 
+      size: req.body.size,
+      priceMin: req.body.priceMin,
+      priceMax: req.body.priceMax, 
+    }
+    watchlistController.validateWatchlistItem(watchlistItem)
+      .then((canAddToWatchlist) => {
+        // console.log(watchlist)
+        if (canAddToWatchlist) {
+          // Watchlist item does not exist for user, add it!
+          watchlistController.addToWatchlist(watchlistItem)
+            .then(() => {
+              res.send({
+                success: 'Sucessfully added watchlist item'
+              })
+            })
+            .catch((err) => {
+              console.log(err)
+              res.send({
+                error: err
+            })
+            // Send an email with the error
+            const msg = {
+              to: 'solem8api@gmail.com',
+              from: 'solem8api@gmail.com', 
+              subject: '[ERROR] /watchlist/add endpoint',
+              text: `There was an issue adding item to watchlist for user ${username}: ${err}`
+            };
+            sgMail.send(msg);
+
+            })
+
+      } else {
+        res.send({
+          error: `Watchlist item already exists for ${watchlistItem.username}`
+        })
+      }
+    })
+    .catch(err => {
+      console.log(err)
+      res.send({
+        error: err
+    })
+    // Send an email with the error
+    const msg = {
+      to: 'solem8api@gmail.com',
+      from: 'solem8api@gmail.com', 
+      subject: '[ERROR] /watchlist/add endpoint',
+      text: `There was an issue editing watchlist for user ${username}: ${err}`
+    };
+    sgMail.send(msg);
+
+  }); 
+
+}); 
+
+/*
+  This endpoint validates if a watchlist item can be deleted
+  If it can, delete the item,
+  If it can't, an error is returned
+*/
+router.post('/watchlist/delete', (req, res) => { 
+  console.log(req.body); // {foo:'bar',n:40}
+  // Parse the JSON
+  let watchlistItem = {
+    username: req.body.username, 
+    model: req.body.model, 
+    size: req.body.size,
+    priceMin: req.body.priceMin,
+    priceMax: req.body.priceMax, 
+  }
+
+  // Check if item exists before deleting 
+  watchlistController.validateWatchlistItem(watchlistItem)
+  .then((exists) => {
+    // console.log(watchlist)
+    if (!exists) {
+      // Watchlist item does not exist for user, add it!
+      watchlistController.delete(watchlistItem)
+        .then(() => {
+          res.send({
+            success: 'Sucessfully deleted watchlist item'
+          })
+        })
+        .catch((err) => {
+          console.log(err)
+          res.send({
+            error: err
+        })
+        // Send an email with the error
+        const msg = {
+          to: 'solem8api@gmail.com',
+          from: 'solem8api@gmail.com', 
+          subject: '[ERROR] /watchlist/delete endpoint',
+          text: `There was an issue deleting item to watchlist for user ${username}: ${err}`
+        };
+        sgMail.send(msg);
+
+        })
+
+    } else {
+      res.send({
+        error: `Cannot delete non-existing watchlist item for ${watchlistItem.username}`
+      })
+    }
+  })
+  .catch(err => {
+    console.log(err)
+    res.send({
+      error: err
+  })
+  // Send an email with the error
+  const msg = {
+    to: 'solem8api@gmail.com',
+    from: 'solem8api@gmail.com', 
+    subject: '[ERROR] /watchlist/delete endpoint',
+    text: `There was an issue deleting from watchlist for user ${username}: ${err}`
+  };
+
+  sgMail.send(msg);
+  }); 
 }); 
 
 /*
