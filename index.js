@@ -8,6 +8,5 @@ require('console-stamp')(console, '[HH:MM:ss.l]');
 app.listen(port, () => {
   console.log(`App listening on port ${port}`);
 });
-
-
+// Kick off the crawler
 scheduledCrawl();

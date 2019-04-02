@@ -35,6 +35,13 @@ const getSearches = () => {
             })
             .catch(err => {
                 console.log("Error retrieving db data");
+                const msg = {
+                    to: 'solem8api@gmail.com',
+                    from: 'solem8api@gmail.com', 
+                    subject: `[ERROR] RETREVING SUPPORTED SHOES`,
+                    text: `There was an error retrieving shoes from supportedShoes table on crawl ${cronCount}: ${err}`
+                  };
+                sgMail.send(msg);
                 reject(err); 
             });
         // let q = "select distinct model, size from supportedShoes"; 
@@ -78,6 +85,13 @@ const updateShoeTable = (searches, data) => {
     .catch((err) => {
         // Handle err
         console.log(err)
+        const msg = {
+            to: 'solem8api@gmail.com',
+            from: 'solem8api@gmail.com', 
+            subject: `[ERROR] UPDATING SHOE TABLE`,
+            text: `There was an error updating the shoes table on crawl ${cronCount}: ${err}`
+          };
+        sgMail.send(msg);
     })
 
 }
@@ -92,6 +106,13 @@ const deleteEntries = (model, size) => {
             resolve(1);
         } catch(err) {
             console.log("Error deleting from table");
+            const msg = {
+                to: 'solem8api@gmail.com',
+                from: 'solem8api@gmail.com', 
+                subject: `[ERROR] DELETING FROM SHOE TABLE`,
+                text: `There was an error deleting from the shoes table on crawl ${cronCount}: ${err}`
+              };
+            sgMail.send(msg);
             reject(err); 
         }
         // let q = "delete from shoes where " 
@@ -152,8 +173,15 @@ const crawl = (model, size) => {
         })
         .catch((err) => {
             // Handle err properly
-            reject(err)
             console.log(err);
+            const msg = {
+                to: 'solem8api@gmail.com',
+                from: 'solem8api@gmail.com', 
+                subject: `[ERROR] INITIATING CRAWL`,
+                text: `There was an error updating the shoes table on crawl ${cronCount}: ${err}`
+              };
+            sgMail.send(msg);
+            reject(err)
         })
 
     })
@@ -178,6 +206,13 @@ const cronCrawl = (queue) => {
         })
         .catch((err) => {
             console.log(err)
+            const msg = {
+                to: 'solem8api@gmail.com',
+                from: 'solem8api@gmail.com', 
+                subject: `[ERROR] INITIATING CRAWL ON CHUNK`,
+                text: `There was an error crawling on chunk ${chunk}: ${err}`
+              };
+            sgMail.send(msg);
         }) 
 
 }; 
@@ -188,9 +223,17 @@ const cronCrawl = (queue) => {
 */
 scheduledCrawl = () => {
     // Uncomment me with appropriate interval in production 
-    // cron.schedule('*/2 * * * *', () => {
+    cron.schedule('*/2 * * * *', () => {
         cronCount++; 
-        console.log(`------------------Initiating crawl # ${cronCount}`);
+        console.log(`------------------Initiating crawl # ${cronCount} @ ${new Date().toISOString()}`);
+        const msg = {
+            to: 'solem8api@gmail.com',
+            from: 'solem8api@gmail.com', 
+            subject: `Initiating crawl ${cronCount}`,
+            text: `A crawl is being initiated @ ${new Date().toISOString()}`
+          };
+        console.log('----------SENDING EMAIL')
+        sgMail.send(msg);
         puppeteer
             .launch()
             .then((browser) => {
@@ -224,14 +267,7 @@ scheduledCrawl = () => {
                         }                
                     })
             })
-        const msg = {
-            to: 'solem8api@gmail.com',
-            from: 'solem8api@gmail.com', 
-            subject: `Initiating crawl ${cronCount}`,
-            text: 'A crawl is being initiated'
-          };
-        sgMail.send(msg);
-        // });
+    })
 };
 
 

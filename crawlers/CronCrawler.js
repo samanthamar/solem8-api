@@ -1,6 +1,12 @@
 const $ = require('cheerio');
 const Craigslist = require('./Craigslist');
 
+// Load env variables for sendgrid
+const environment = process.env.NODE_ENV || 'development';
+const { sendgrid_key } = require('./../config/config')[environment].server;
+const sgMail = require('@sendgrid/mail'); 
+sgMail.setApiKey(sendgrid_key);
+
 class CronCrawler extends Craigslist {
 
     constructor(url, page, baseShoe) {
@@ -87,6 +93,13 @@ class CronCrawler extends Craigslist {
         .catch((err) => {
             // Handle error properly
             console.log(err)
+            const msg = {
+                to: 'solem8api@gmail.com',
+                from: 'solem8api@gmail.com', 
+                subject: `[ERROR] PERFORMING CRAWL`,
+                text: `There was an error performing crawl: ${err}`
+              };
+            sgMail.send(msg);            
         })
     };
   }

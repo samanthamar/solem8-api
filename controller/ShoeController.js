@@ -5,6 +5,8 @@ const SupportedShoes = require('../models/SupportedShoes');
 /*
   The Shoe Controller is responsible 
   for all DB operations on Shoe objects
+  Errors are logged and are propogated back up 
+  to parent call
 */
 class ShoeController {
     constructor() {
@@ -76,7 +78,10 @@ class ShoeController {
 
     async getSupportedShoes() {
         try {
-            const data = await SupportedShoes.query();
+            const data = await SupportedShoes
+                    .query()
+                    .distinct('model')
+                    .select()
             console.log(data)
             return data
         } catch(err) {
