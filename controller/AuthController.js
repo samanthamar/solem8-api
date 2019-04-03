@@ -55,10 +55,15 @@ class AuthController {
 
     static async loginUser(req, res) {
         // Find if user exists
+        let params = {
+            username: req.body.username,
+            password: req.body.password,
+            email: req.body.email
+        }
+
         const user = await User
         .query()
-        .where('username', req.body.username)
-        .andWhere('email', req.body.email);
+        .where('username', params.username)
 
         // If user does not exist in the backend
         if(user.length == 0) {
@@ -70,7 +75,7 @@ class AuthController {
         }
 
         // Invalid password
-        let validPassword = await bcrypt.compare(req.body.password, user[0].password)
+        let validPassword = await bcrypt.compare(params.password, user[0].password)
         if(!validPassword) {
             return res.status(401).send({ 
                 auth: false, 

@@ -14,7 +14,8 @@ const settings = {
   production: {
     server: {
       port: 3000,
-      sendgrid_key: process.env.SENDGRID_API_KEY
+      sendgrid_key: process.env.SENDGRID_API_KEY,
+      secret: process.env.SECRET_KEY
     }
   }
 }
