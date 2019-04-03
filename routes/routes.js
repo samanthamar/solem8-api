@@ -4,7 +4,6 @@ const Craigslist = require('./../crawlers/Craigslist');
 const BaseShoe = require('./../models/BaseShoe');
 const ShoeController = require('../controller/ShoeController');
 const AuthController = require('../controller/AuthController');
-const puppeteer = require('puppeteer');
 const WatchlistController = require('../controller/WatchlistController');
 
 // Load env variables for sendgrid
