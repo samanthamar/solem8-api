@@ -23,10 +23,10 @@ class ShoeController {
 
     async delete(model, size) {
         const numShoesDeleted = await Shoe
-        .query()
-        .delete()
-        .where('model', model)
-        .andWhere('size', size);
+            .query()
+            .delete()
+            .where('model', model)
+            .andWhere('size', size);
         console.log(numShoesDeleted + " entries is deleted");
     }
 
@@ -54,7 +54,7 @@ class ShoeController {
         try {
             // Don't know how the frontend will send this param
             let shoes; 
-            if (searchParams.sortLowHigh == 'true') {
+            if (searchParams.sortLowHigh == 'True') {
                 shoes = await Shoe.query()
                     .where('model', searchParams.model)
                     .andWhere('size', searchParams.size)
