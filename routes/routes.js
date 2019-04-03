@@ -26,7 +26,12 @@ router.get('/', (req, res) => {
   This is endpoint retrieves a user's watchlist
 */
 router.get('/watchlist', (req, res) => { 
-  let username = req.query.username; 
+  let username = req.query.username;
+  if(!username) {
+    res.status(400).send({
+      error: "username field should not be empty"
+    })
+  }
   watchlistController 
     .getWatchlist(username)
     .then((watchlist) => {
@@ -68,6 +73,7 @@ router.post('/watchlist/add', (req, res) => {
       priceMin: req.body.priceMin,
       priceMax: req.body.priceMax, 
     }
+
     watchlistController.validateWatchlistItem(watchlistItem)
       .then((canAddToWatchlist) => {
         // console.log(watchlist)

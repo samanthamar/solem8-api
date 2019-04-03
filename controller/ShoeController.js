@@ -31,62 +31,46 @@ class ShoeController {
     }
 
     async insert(shoeDetail) {
-        try {
-            this.validateInput(shoeDetail)
-            await Shoe
-                .query()
-                .insert(shoeDetail)
-        } catch(err) {
-            console.log(err)
-        }
+        this.validateInput(shoeDetail)
+        await Shoe
+            .query()
+            .insert(shoeDetail)
     }
 
     async getAllShoes() {
-        try {
-            const allShoes = await Shoe.query()
-            return allShoes
-        } catch(err) {
-            console.log(err);
-        }
+        const allShoes = await Shoe.query()
+        return allShoes
     }
 
     async queryShoes(searchParams) {
-        try {
-            // Don't know how the frontend will send this param
-            let shoes; 
-            if (searchParams.sortLowHigh == 'True') {
-                shoes = await Shoe.query()
-                    .where('model', searchParams.model)
-                    .andWhere('size', searchParams.size)
-                    .andWhere('price', '>=', searchParams.priceMin)
-                    .andWhere('price', '<=', searchParams.priceMax)
-                    .orderBy('price', 'asc')   
-            } else {
-                shoes = await Shoe.query()
-                    .where('model', searchParams.model)
-                    .andWhere('size', searchParams.size)
-                    .andWhere('price', '>=', searchParams.priceMin)
-                    .andWhere('price', '<=', searchParams.priceMax)
-                    .orderBy('price', 'desc')   
-            }
-            console.log(shoes.length + "Shoes found in the database");
-            return shoes;
-        } catch(err) {
-            console.log(err);
+        // Don't know how the frontend will send this param
+        let shoes; 
+        if (searchParams.sortLowHigh == 'True') {
+            shoes = await Shoe.query()
+                .where('model', searchParams.model)
+                .andWhere('size', searchParams.size)
+                .andWhere('price', '>=', searchParams.priceMin)
+                .andWhere('price', '<=', searchParams.priceMax)
+                .orderBy('price', 'asc')   
+        } else {
+            shoes = await Shoe.query()
+                .where('model', searchParams.model)
+                .andWhere('size', searchParams.size)
+                .andWhere('price', '>=', searchParams.priceMin)
+                .andWhere('price', '<=', searchParams.priceMax)
+                .orderBy('price', 'desc')   
         }
+        console.log(shoes.length + " Shoes found in the database");
+        return shoes;
     }
 
     async getSupportedShoes() {
-        try {
-            const data = await SupportedShoes
-                    .query()
-                    .distinct('model')
-                    .select()
-            console.log(data)
-            return data
-        } catch(err) {
-            console.log(err);
-        }
+        const data = await SupportedShoes
+                .query()
+                .distinct('model')
+                .select()
+        console.log(data)
+        return data
     }
 }
 
