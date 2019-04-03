@@ -6,11 +6,12 @@ const bodyParser = require('body-parser');
   List endpoints here
 */
 // support parsing of application/json type post data
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 //support parsing of application/x-www-form-urlencoded post data
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.json()); // Parse JSON for post requests
+app.use(express.urlencoded({ extended: true })); // Parse JSON for post requests
 app.use('/', router);
 app.use('/craigslist', router); 
 app.use('/shoes', router); 
