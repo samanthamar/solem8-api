@@ -58,7 +58,6 @@ class AuthController {
         let params = {
             username: req.body.username,
             password: req.body.password,
-            email: req.body.email
         }
 
         const user = await User
