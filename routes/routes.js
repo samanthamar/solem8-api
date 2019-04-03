@@ -97,8 +97,8 @@ router.post('/register', AuthController.createUser);
 /* 
     The endpoint validates if the user exists
 */
-
 router.get('/findUser', AuthController.findUser);
+
 /*
     This endpoint is used for Login the user
 */
