@@ -223,7 +223,7 @@ const cronCrawl = (queue) => {
 */
 scheduledCrawl = () => {
     // Uncomment me with appropriate interval in production 
-    cron.schedule('*/2 * * * *', () => {
+    cron.schedule('0 2 * * *', () => {
         cronCount++; 
         console.log(`------------------Initiating crawl # ${cronCount} @ ${new Date().toISOString()}`);
         const msg = {

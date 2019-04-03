@@ -2,6 +2,7 @@ const router = require('express').Router();
 const Craigslist = require('./../crawlers/Craigslist');
 const BaseShoe = require('./../models/BaseShoe');
 const ShoeController = require('../controller/ShoeController');
+const AuthController = require('../controller/AuthController');
 const puppeteer = require('puppeteer');
 
 // Load env variables for sendgrid
@@ -87,6 +88,21 @@ router.get('/supportedShoes', (req, res) => {
       sgMail.send(msg);
   });
 });
+
+/*
+    This endpoint is used for registering the user
+*/
+router.post('/register', AuthController.createUser);
+
+/* 
+    The endpoint validates if the user exists
+*/
+
+router.get('/findUser', AuthController.findUser);
+/*
+    This endpoint is used for Login the user
+*/
+router.post('/login', AuthController.loginUser);
 
 /*
   This endpoint is just for testing the crawler.
