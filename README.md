@@ -13,6 +13,11 @@ Return shoes from DB: `localhost:3000/shoes/`
 
 **Usage:** 
 /craigslist: `?model=<model>&size=<size>`
+/shoes: `?model=yeezy&size=10&priceMin=0&priceMax=1000&sortLowHigh=true`
+/supportedShoes 
+/watchlist 
+/watchlist/add 
+/watchlist/delete
 
 **LocalDB:**
 Execute the following to create the appropriate local DB and table:
@@ -24,6 +29,8 @@ Execute the following to create the appropriate local DB and table:
 `create table shoes (id int NOT NULL AUTO_INCREMENT, model varchar (50), size float,  url varchar(100), source varchar(50), title varchar(100), price float, photo varchar (100), PRIMARY KEY(id));`
 
 `create table supportedShoes (id int NOT NULL AUTO_INCREMENT, model varchar (50), size float, PRIMARY KEY(id));`
+
+`create table watchlist (id int NOT NULL AUTO_INCREMENT, username varchar (50), model varchar (50), size float, priceMin float, priceMax float, PRIMARY KEY(id));`
 
 
 ---
