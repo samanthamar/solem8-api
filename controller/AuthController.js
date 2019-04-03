@@ -13,15 +13,22 @@ class AuthController {
     // Creates a user
 
     static async createUser(req, res) {
-        bcrypt.hash(req.body.password, salt)
+        let params = {
+            username: req.body.username,
+            password: req.body.password,
+            email: req.body.email
+        }
+
+        console.log(params)
+        bcrypt.hash(params.password, salt)
         .then((hash) => {
             // Store hash in your password DB.
             const user = User
             .query()
             .insert({
-                username: req.body.username,
+                username: params.username,
                 password: hash,
-                email: req.body.email
+                email: params.email
             })
             .then((user) => {
                 // creates the token
@@ -38,11 +45,11 @@ class AuthController {
                 });
             })
             .catch((err) => {
-                res.status(500).send("There was a problem registering the user");
+                return res.status(500).send("There was a problem registering the user" + err);
             });
         })
         .catch((err) => {
-            res.status(500).send("There was a problem hashing the password");
+            return res.status(500).send("There was a problem hashing the password");
         });
     }
 
