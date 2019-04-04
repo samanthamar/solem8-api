@@ -21,6 +21,6 @@ app.use('/findUser', router);
 app.use('/login', router);
 app.use('/watchlist', router);
 app.use('/watchlist/add', router);
-// app.use('/watchlist/delete', router);
+app.use('/watchlist/delete', router);
 
 module.exports = app;

@@ -18,6 +18,9 @@ const salt = 2;
 class AuthController {
     // Creates a user
 
+    /*
+        This endpoint is responsible for registering the user
+    */
     static async createUser(req, res) {
         let params = {
             username: req.body.username,
@@ -64,6 +67,15 @@ class AuthController {
         let params = {
             username: req.body.username,
             password: req.body.password,
+        }
+        console.log(params);
+
+        if (!params.username) {
+            return res.status(400).send({ 
+                auth: false, 
+                token: null,
+                message: "Missing login information"
+            });
         }
 
         const user = await User
