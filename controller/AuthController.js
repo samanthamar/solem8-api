@@ -9,6 +9,12 @@ const User = require('./../models/User');
 // Used for password encryption
 const salt = 2;
 
+/*
+  The Auth Controller is responsible 
+  for all authentication related activites.
+
+  This class will also send back error responses when needed
+*/
 class AuthController {
     // Creates a user
 
@@ -62,6 +68,7 @@ class AuthController {
 
         const user = await User
         .query()
+        .select()
         .where('username', params.username)
 
         // If user does not exist in the backend
@@ -83,7 +90,7 @@ class AuthController {
             });
         }
 
-        let token = jwt.sign({ id: user[0].username }, secret, {
+        let token = jwt.sign({ username: user[0].username }, secret, {
             expiresIn: 86400
         });
 
@@ -108,8 +115,10 @@ class AuthController {
                     auth: false, message: 'Failed to authenticate token.' 
                 });
             }
+
             const user = User
             .query()
+            .select()
             .where('username', decoded.username)
             .then((user) => {
                 if (!user) {

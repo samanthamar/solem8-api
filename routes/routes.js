@@ -19,38 +19,41 @@ sgMail.setApiKey(sendgrid_key);
   the server is responding 
 */
 router.get('/', (req, res) => {
-  res.status(200).json({ message: 'Your backend is working!' });
+    res.status(200).json({ message: 'Your backend is working!' });
 });
 
 /*
   This is endpoint retrieves a user's watchlist
 */
 router.get('/watchlist', (req, res) => { 
-  let username = req.query.username; 
-  watchlistController 
-    .getWatchlist(username)
-    .then((watchlist) => {
-      console.log("------SUCESSFULLY RETRIEVED WATCHLIST");
-      console.log(watchlist);
-      res.send({
-        watchlist: watchlist 
-      });
-    })      
-    .catch(err => {
-      console.log(err)
-      res.send({
-        error: err
-    })
-    // Send an email with the error
-    const msg = {
-      to: 'solem8api@gmail.com',
-      from: 'solem8api@gmail.com', 
-      subject: '[ERROR] /watchlist endpoint',
-      text: `There was an issue retrieving watchlist for user ${username}: ${err}`
-    };
-    sgMail.send(msg);
-  });
-
+    let username = req.query.username;
+    if(!username) {
+        res.status(400).send({
+            message: "Username field should not be empty"
+        });
+    }
+    watchlistController.getWatchlist(username)
+        .then((watchlist) => {
+            console.log("------SUCESSFULLY RETRIEVED WATCHLIST");
+            console.log(watchlist);
+            res.send({
+                watchlist: watchlist 
+            });
+        })      
+        .catch(err => {
+            console.log(err);
+            res.status(500).send({
+                message: `Error getting watchlist: ${err}`
+            })
+            // Send an email with the error
+            const msg = {
+                to: 'solem8api@gmail.com',
+                from: 'solem8api@gmail.com', 
+                subject: '[ERROR] /watchlist endpoint',
+                text: `There was an issue retrieving watchlist for user ${username}: ${err}`
+            };
+            sgMail.send(msg);
+        });
 }); 
 
 /*
@@ -62,61 +65,57 @@ router.post('/watchlist/add', (req, res) => {
     console.log(req.body); // {foo:'bar',n:40}
     // Parse the JSON
     let watchlistItem = {
-      username: req.body.username, 
-      model: req.body.model, 
-      size: req.body.size,
-      priceMin: req.body.priceMin,
-      priceMax: req.body.priceMax, 
+        username: req.body.username, 
+        model: req.body.model, 
+        size: req.body.size,
+        priceMin: req.body.priceMin,
+        priceMax: req.body.priceMax, 
     }
+
     watchlistController.validateWatchlistItem(watchlistItem)
-      .then((canAddToWatchlist) => {
-        // console.log(watchlist)
-        if (canAddToWatchlist) {
-          // Watchlist item does not exist for user, add it!
-          watchlistController.addToWatchlist(watchlistItem)
-            .then(() => {
-              res.send({
-                success: 'Sucessfully added watchlist item'
-              })
-            })
-            .catch((err) => {
-              console.log(err)
-              res.send({
-                error: err
-            })
+        .then((canAddToWatchlist) => {
+            if (canAddToWatchlist) {
+            // Watchlist item does not exist for user, add it!
+                watchlistController.addToWatchlist(watchlistItem)
+                    .then(() => {
+                        res.send({
+                            message: 'Sucessfully added watchlist item'
+                        })
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        res.send({
+                            message: "An error has occurred adding to watchlist"
+                        })
+                        // Send an email with the error
+                        const msg = {
+                            to: 'solem8api@gmail.com',
+                            from: 'solem8api@gmail.com', 
+                            subject: '[ERROR] /watchlist/add endpoint',
+                            text: `There was an issue adding item to watchlist for user ${username}: ${err}`
+                        };
+                        sgMail.send(msg);
+                    });
+            } else {
+                res.status(409).send({
+                    message: `Error adding to Watchlist. Item already exists for ${watchlistItem.username}`
+                });
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(400).send({
+                message: "Bad Request - missing parameters"
+            });
             // Send an email with the error
             const msg = {
-              to: 'solem8api@gmail.com',
-              from: 'solem8api@gmail.com', 
-              subject: '[ERROR] /watchlist/add endpoint',
-              text: `There was an issue adding item to watchlist for user ${username}: ${err}`
+                to: 'solem8api@gmail.com',
+                from: 'solem8api@gmail.com', 
+                subject: '[ERROR] /watchlist/add endpoint',
+                text: `There was an issue editing watchlist for user ${username}: ${err}`
             };
             sgMail.send(msg);
-
-            })
-
-      } else {
-        res.send({
-          error: `Watchlist item already exists for ${watchlistItem.username}`
-        })
-      }
-    })
-    .catch(err => {
-      console.log(err)
-      res.send({
-        error: err
-    })
-    // Send an email with the error
-    const msg = {
-      to: 'solem8api@gmail.com',
-      from: 'solem8api@gmail.com', 
-      subject: '[ERROR] /watchlist/add endpoint',
-      text: `There was an issue editing watchlist for user ${username}: ${err}`
-    };
-    sgMail.send(msg);
-
-  }); 
-
+        }); 
 }); 
 
 /*
@@ -125,65 +124,64 @@ router.post('/watchlist/add', (req, res) => {
   If it can't, an error is returned
 */
 router.post('/watchlist/delete', (req, res) => { 
-  console.log(req.body); // {foo:'bar',n:40}
-  // Parse the JSON
-  let watchlistItem = {
-    username: req.body.username, 
-    model: req.body.model, 
-    size: req.body.size,
-    priceMin: req.body.priceMin,
-    priceMax: req.body.priceMax, 
-  }
+    console.log(req.body); // {foo:'bar',n:40}
+    // Parse the JSON
+    let watchlistItem = {
+        username: req.body.username, 
+        model: req.body.model, 
+        size: req.body.size,
+        priceMin: req.body.priceMin,
+        priceMax: req.body.priceMax, 
+    }
 
-  // Check if item exists before deleting 
-  watchlistController.validateWatchlistItem(watchlistItem)
-  .then((exists) => {
-    // console.log(watchlist)
-    if (!exists) {
-      // Watchlist item does not exist for user, add it!
-      watchlistController.delete(watchlistItem)
-        .then(() => {
-          res.send({
-            success: 'Sucessfully deleted watchlist item'
-          })
-        })
-        .catch((err) => {
-          console.log(err)
-          res.send({
-            error: err
-        })
+    // Check if item exists before deleting 
+    watchlistController.validateWatchlistItem(watchlistItem)
+    .then((exists) => {
+        // console.log(watchlist)
+        if (!exists) {
+        // Watchlist item does not exist for user, add it!
+            watchlistController.delete(watchlistItem)
+                .then(() => {
+                    res.send({
+                        message: 'Sucessfully deleted watchlist item'
+                    })
+                })
+                .catch((err) => {
+                    console.log(err)
+                    res.send({
+                        message: `An error has occurred deleting a watchlist item. ${err}`
+                    })
+                    // Send an email with the error
+                    const msg = {
+                        to: 'solem8api@gmail.com',
+                        from: 'solem8api@gmail.com', 
+                        subject: '[ERROR] /watchlist/delete endpoint',
+                        text: `There was an issue deleting item to watchlist for user ${username}: ${err}`
+                    };
+                    sgMail.send(msg);
+
+                });
+        } else {
+            res.status(404).send({
+                message: `Cannot delete non-existing watchlist item for ${watchlistItem.username}`
+            });
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(400).send({
+            message: "Bad Request - missing parameters"
+        });
         // Send an email with the error
         const msg = {
-          to: 'solem8api@gmail.com',
-          from: 'solem8api@gmail.com', 
-          subject: '[ERROR] /watchlist/delete endpoint',
-          text: `There was an issue deleting item to watchlist for user ${username}: ${err}`
+            to: 'solem8api@gmail.com',
+            from: 'solem8api@gmail.com', 
+            subject: '[ERROR] /watchlist/delete endpoint',
+            text: `There was an issue deleting from watchlist for user ${username}: ${err}`
         };
+
         sgMail.send(msg);
-
-        })
-
-    } else {
-      res.send({
-        error: `Cannot delete non-existing watchlist item for ${watchlistItem.username}`
-      })
-    }
-  })
-  .catch(err => {
-    console.log(err)
-    res.send({
-      error: err
-  })
-  // Send an email with the error
-  const msg = {
-    to: 'solem8api@gmail.com',
-    from: 'solem8api@gmail.com', 
-    subject: '[ERROR] /watchlist/delete endpoint',
-    text: `There was an issue deleting from watchlist for user ${username}: ${err}`
-  };
-
-  sgMail.send(msg);
-  }); 
+    }); 
 }); 
 
 /*
@@ -200,29 +198,28 @@ router.get('/shoes', (req, res) => {
         sortLowHigh: req.query.sortLowHigh
     } 
     
-    shoeController
-      .queryShoes(searchParams)
-      .then(returnedShoes => {
-        console.log("------SUCESSFULLY RETRIEVED RESULTS");
-        console.log(returnedShoes);
-        res.send({
-          shoes: returnedShoes 
-        });
-      })
-      .catch(err => {
-          console.log(err)
-          res.send({
-            error: err
+    shoeController.queryShoes(searchParams)
+        .then(returnedShoes => {
+            console.log("------SUCESSFULLY RETRIEVED RESULTS");
+            console.log(returnedShoes);
+            res.send({
+                shoes: returnedShoes 
+            });
         })
-        // Send an email with the error
-        const msg = {
-          to: 'solem8api@gmail.com',
-          from: 'solem8api@gmail.com', 
-          subject: '[ERROR] /shoes endpoint',
-          text: `There was an issue retrieving data from the shoes table: ${err}`
-        };
-        sgMail.send(msg);
-    });
+        .catch(err => {
+            console.log(err)
+            res.status(400).send({
+                message: "Error retrieving shoes. Possible missing request parameters."
+            });
+            // Send an email with the error
+            const msg = {
+                to: 'solem8api@gmail.com',
+                from: 'solem8api@gmail.com', 
+                subject: '[ERROR] /shoes endpoint',
+                text: `There was an issue retrieving data from the shoes table: ${err}`
+            };
+            sgMail.send(msg);
+        });
 });
 
 /*
@@ -230,29 +227,28 @@ router.get('/shoes', (req, res) => {
   json response is returned. 
 */
 router.get('/supportedShoes', (req, res) => {
-  shoeController
-    .getSupportedShoes()
+  shoeController.getSupportedShoes()
     .then(returnedShoes => {
-      console.log("------SUCESSFULLY RETRIEVED RESULTS");
-      console.log(returnedShoes);
-      res.send({
-        shoes: returnedShoes 
-      });
+        console.log("------SUCESSFULLY RETRIEVED RESULTS");
+        console.log(returnedShoes);
+        res.send({
+            shoes: returnedShoes 
+        });
     })
     .catch(err => {
-      console.log(err)
-      res.send({
-        error: err
-      })
-      // Send an email with the error
-      const msg = {
-        to: 'solem8api@gmail.com',
-        from: 'solem8api@gmail.com', 
-        subject: '[ERROR] /supportedShoes endpoint',
-        text: `There was an issue retrieving data from the shoes table: ${err}`
-      };
-      sgMail.send(msg);
-  });
+        console.log(err)
+        res.status(500).send({
+            message: `Error retrieving supported shoes. ${err}`
+        });
+        // Send an email with the error
+        const msg = {
+            to: 'solem8api@gmail.com',
+            from: 'solem8api@gmail.com', 
+            subject: '[ERROR] /supportedShoes endpoint',
+            text: `There was an issue retrieving data from the shoes table: ${err}`
+        };
+        sgMail.send(msg);
+    });
 });
 
 /*
