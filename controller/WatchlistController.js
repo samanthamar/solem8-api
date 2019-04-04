@@ -57,14 +57,14 @@ class WatchlistController {
        Delete a watchlist item for a user into DB
     */
     async delete(watchlistItem) {
-       await Watchlist
-        .query()
-        .delete()
-        .where('username', watchlistItem.username)
-        .andWhere('model', watchlistItem.model)
-        .andWhere('size', watchlistItem.size)
-        .andWhere('priceMin', watchlistItem.priceMin)
-        .andWhere('priceMax', watchlistItem.priceMax); 
+        await Watchlist
+            .query()
+            .delete()
+            .where('username', watchlistItem.username)
+            .andWhere('model', watchlistItem.model)
+            .andWhere('size', watchlistItem.size)
+            .andWhere('priceMin', watchlistItem.priceMin)
+            .andWhere('priceMax', watchlistItem.priceMax); 
     }
 }
 
