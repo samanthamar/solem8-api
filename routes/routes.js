@@ -209,7 +209,7 @@ router.get('/shoes', (req, res) => {
         .catch(err => {
             console.log(err)
             res.status(400).send({
-                message: `Error retrieving shoes. ${err}`
+                message: "Error retrieving shoes. Possible missing request parameters."
             });
             // Send an email with the error
             const msg = {
@@ -237,7 +237,7 @@ router.get('/supportedShoes', (req, res) => {
     })
     .catch(err => {
         console.log(err)
-        res.status(400).send({
+        res.status(500).send({
             message: `Error retrieving supported shoes. ${err}`
         });
         // Send an email with the error
